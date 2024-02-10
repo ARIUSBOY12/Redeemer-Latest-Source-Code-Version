@@ -42,10 +42,10 @@ def Update():
             latest_source = response.text
             with open("ui.py", "w", encoding="utf-8") as file:
                 file.write(latest_source)
-            print("Installed the latest version successfully.")
+            print("Installed the latest version successfully.\nPlease Rerun the program.")
             time.sleep(10)
         else:
-            print("Failed to fetch the latest source code.")
+            print("Failed to install the latest version.")
     except Exception as e:
         print(f"An error occurred: {e}")
 
@@ -80,9 +80,10 @@ Update Log:
 
 {current_version}
 · Faster Injection
-· ToolLess Injection
-· UI
+· ToolLess
 · Auto Update
+· GUI
+
 
 """.format()    
                                                      
@@ -92,7 +93,7 @@ PrintTitle()
     
 UpdateLog()
 time.sleep(0.2)
-pastebin = 'https://pastebin.com/raw/iunBLXdk' # dont change
+pastebin = 'https://pastebin.com/raw/iunBLXdk' # dont change. its the latest version
 time.sleep(0.2)
 
 try:
@@ -105,13 +106,20 @@ except requests.RequestException as e:
     print(f"Error: {e}")
     time.sleep(15)
     exit()
-#CurrentVersion = 'V4.1'  #dontchange
 if latestversion > current_version:
-    print(Colorate.Horizontal(Colors.purple_to_blue, f"A new version ({latestversion}) is available. Installing the latest version..", 1))
-    if __name__ == "__main__":
-        Update()
-    time.sleep(10)
-    exit()
+        while True:
+            Rsp0 = input(Colorate.Horizontal(Colors.purple_to_blue, f"A new version ({latestversion}) is available. Do you wish to install the latest version? (y/n) "))
+            if Rsp0 in ["y", "Y", "n", "N"]:
+                if Rsp0 in ["y", "Y"]:
+                    time.sleep(1)
+                    if __name__ == "__main__":
+                        Update()
+                    time.sleep(10)
+                    exit()
+                elif Rsp0 in ["n", "N"]:
+                    print("Closing the program..")
+                    time.sleep(2)
+                    exit()
 
 print("")
 print(Colorate.Horizontal(Colors.purple_to_blue, "Made by Xavier✞ | NIKYISME | Hisako | Darian | Bobly | Cipher | Klay", 1))
