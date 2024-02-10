@@ -37,7 +37,7 @@ def CloseRBLX():
 
 def Update():
     try:
-        response = requests.get("https://pastebin.com/raw/cV9JeUUG")
+        response = requests.get("https://raw.githubusercontent.com/ARIUSBOY12/Redeemer-Latest-Source-Code-Version/main/RedeemerSource")
         if response.status_code == 200:
             latest_source = response.text
             with open("ui.py", "w", encoding="utf-8") as file:
@@ -60,7 +60,7 @@ def undetectname():
 
 undetectname()
 
-current_version = 'V4.0'
+current_version = 'V4.1'
 
 def PrintTitle():
     GamingTextw = r"""    
