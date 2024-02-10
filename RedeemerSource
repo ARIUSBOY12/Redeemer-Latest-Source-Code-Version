@@ -1,0 +1,976 @@
+from tkinter import *
+import tkinter.messagebox
+import customtkinter
+import webbrowser
+from PIL import Image, ImageTk
+from multiprocessing import Process
+from pystyle import Colors, Colorate
+from colorama import init, Fore
+import requests
+import ctypes
+import random
+import string
+import pymem
+import time
+import re
+import os
+import psutil
+from customtkinter import *
+
+
+p = psutil.Process(os.getpid())
+p.nice(psutil.HIGH_PRIORITY_CLASS)
+
+
+def CloseRBLX():
+    UWP = Redeemer.YieldForProgram("Windows10Universal.exe")
+    Web =  Redeemer.YieldForProgram("RobloxPlayerBeta.exe")
+
+    if UWP:
+        os.system("taskkill /im Windows10Universal.exe")
+    elif not UWP:
+        os.system("taskkill /im RobloxPlayerBeta.exe")
+        exit
+    elif not UWP and not Web:
+        print("/\Roblox process has not been found")
+        exit()
+
+def Update():
+    try:
+        response = requests.get("https://pastebin.com/raw/cV9JeUUG")
+        if response.status_code == 200:
+            latest_source = response.text
+            with open("ui.py", "w", encoding="utf-8") as file:
+                file.write(latest_source)
+            print("UI updated successfully.")
+            time.sleep(10)
+        else:
+            print("Failed to fetch the latest source code.")
+    except Exception as e:
+        print(f"An error occurred: {e}")
+
+
+
+os.system("cls" if os.name == "nt" else "clear")
+
+def undetectname():
+    letters = string.ascii_lowercase
+    appname = ''.join(random.choice(letters) for _ in range(10))
+    ctypes.windll.kernel32.SetConsoleTitleW(appname)
+
+undetectname()
+
+current_version = 'V4.0'
+
+def PrintTitle():
+    GamingTextw = r"""    
+              _                               
+             | |                              
+ _ __ ___  __| | ___  ___ _ __ ___   ___ _ __ 
+| '__/ _ \/ _` |/ _ \/ _ \ '_ ` _ \ / _ \ '__|
+| | |  __/ (_| |  __/  __/ | | | | |  __/ |   
+|_|  \___|\__,_|\___|\___|_| |_| |_|\___|_|
+
+    """.format()                                             
+    print(Colorate.Horizontal(Colors.purple_to_blue, GamingTextw, True)) 
+
+def UpdateLog():
+            UpdateLogs = rf"""   
+Update Log:      
+
+{current_version}
+· Faster Injection
+· ToolLess Injection
+· UI
+· Auto Update
+
+""".format()    
+                                                     
+            print(Colorate.Horizontal(Colors.purple_to_blue, UpdateLogs, True)) 
+
+PrintTitle()
+    
+UpdateLog()
+time.sleep(0.2)
+pastebin = 'https://pastebin.com/raw/iunBLXdk' # dont change
+time.sleep(0.2)
+
+try:
+    response = requests.get(pastebin)
+    time.sleep(0.2)
+    response.raise_for_status()
+    time.sleep(0.2)
+    latestversion = response.text
+except requests.RequestException as e:
+    print(f"Error: {e}")
+    time.sleep(15)
+    exit()
+#CurrentVersion = 'V4.1'  #dontchange
+if latestversion > current_version:
+    print(Colorate.Horizontal(Colors.purple_to_blue, f"A new version ({latestversion}) is available. Please download the new version in our Discord Server.\nDiscord: https://discord.gg/redeemerog", 1))
+    if __name__ == "__main__":
+        Update()
+    time.sleep(10)
+    exit()
+
+print("")
+print(Colorate.Horizontal(Colors.purple_to_blue, "Made by Xavier✞ | NIKYISME | Hisako | Darian | Bobly | Cipher | Klay", 1))
+
+print(Colorate.Horizontal(Colors.purple_to_blue, "discord.gg/redeemerog", 1))
+time.sleep(1)
+print(Colorate.Horizontal(Colors.purple_to_blue, "\n/\Compiling", 1))
+
+class Redeemer:
+    def __init__(self, program_name):
+        self.program_name = program_name
+
+    def SimpleGetProcesses(self):
+        return [proc.name() for proc in psutil.process_iter(["name"])]
+    
+    def SetParent(self, Instance, Parent, parentOffset):
+        Redeemer.Pymem.write_longlong(Instance + parentOffset, Parent)
+
+    def __init__(self, ProgramName=None):
+        self.ProgramName = ProgramName
+        self.Pymem = pymem.Pymem()
+        self.Addresses = {}
+        self.Handle = None
+        self.is64bit = True
+        self.ProcessID = None
+        self.PID = self.ProcessID
+        if type(ProgramName) == str:
+            self.Pymem = pymem.Pymem(ProgramName)
+            self.Handle = self.Pymem.process_handle
+            self.is64bit = pymem.process.is_64_bit(self.Handle)
+            self.ProcessID = self.Pymem.process_id
+            self.PID = self.ProcessID
+        elif type(ProgramName) == int:
+            self.Pymem.open_process_from_id(ProgramName)
+            self.Handle = self.Pymem.process_handle
+            self.is64bit = pymem.process.is_64_bit(self.Handle)
+            self.ProcessID = self.Pymem.process_id
+            self.PID = self.ProcessID
+
+    def h2d(self, hz: str, bit: int = 16) -> int:
+        if type(hz) == int:
+            return hz
+        return int(hz, bit)
+
+    def d2h(self, dc: int, UseAuto=None) -> str:
+        if type(dc) == str:
+            return dc
+        if UseAuto:
+            if UseAuto == 32:
+                dc = hex(dc & (2**32 - 1)).replace("0x", "")
+            else:
+                dc = hex(dc & (2**64 - 1)).replace("0x", "")
+        else:
+            if abs(dc) > 4294967295:
+                dc = hex(dc & (2**64 - 1)).replace("0x", "")
+            else:
+                dc = hex(dc & (2**32 - 1)).replace("0x", "")
+        if len(dc) > 8:
+            while len(dc) < 16:
+                dc = "0" + dc
+        if len(dc) < 8:
+            while len(dc) < 8:
+                dc = "0" + dc
+        return dc
+
+    def PLAT(self, aob: str):
+        if type(aob) == bytes:
+            return aob
+        trueB = bytearray(b"")
+        aob = aob.replace(" ", "")
+        PLATlist = []
+        for i in range(0, len(aob), 2):
+            PLATlist.append(aob[i : i + 2])
+        for i in PLATlist:
+            if "?" in i:
+                trueB.extend(b".")
+            if "?" not in i:
+                trueB.extend(re.escape(bytes.fromhex(i)))
+        return bytes(trueB)
+
+    def AOBSCANALL(self, AOB_HexArray, xreturn_multiple=False):
+        try:
+         return pymem.pattern.pattern_scan_all(
+            self.Pymem.process_handle,
+            self.PLAT(AOB_HexArray),
+            return_multiple=xreturn_multiple,
+        )
+        except Exception as e:
+            print(f"WinApi Error: {e}")
+            pass
+
+
+    def gethexc(self, hex: str):
+        hex = hex.replace(" ", "")
+        hxlist = []
+        for i in range(0, len(hex), 2):
+            hxlist.append(hex[i : i + 2])
+        return len(hxlist)
+
+    def hex2le(self, hex: str):
+        lehex = hex.replace(" ", "")
+        lelist = []
+        if len(lehex) > 8:
+            while len(lehex) < 16:
+                lehex = "0" + lehex
+            for i in range(0, len(lehex), 2):
+                lelist.append(lehex[i : i + 2])
+            lelist.reverse()
+            return "".join(lelist)
+        if len(lehex) < 9:
+            while len(lehex) < 8:
+                lehex = "0" + lehex
+            for i in range(0, len(lehex), 2):
+                lelist.append(lehex[i : i + 2])
+            lelist.reverse()
+            return "".join(lelist)
+
+    def calcjmpop(self, des, cur):
+        jmpopc = (self.h2d(des) - self.h2d(cur)) - 5
+        jmpopc = hex(jmpopc & (2**32 - 1)).replace("0x", "")
+        if len(jmpopc) % 2 != 0:
+            jmpopc = "0" + str(jmpopc)
+        return jmpopc
+
+    def isProgramGameActive(self):
+        try:
+            self.Pymem.read_char(self.Pymem.base_address)
+            return True
+        except:
+            return False
+
+    def DRP(self, Address: int, is64Bit: bool = None) -> int:
+        Address = Address
+        if type(Address) == str:
+            Address = self.h2d(Address)
+        if is64Bit:
+            return int.from_bytes(self.Pymem.read_bytes(Address, 8), "little")
+        if self.is64bit:
+            return int.from_bytes(self.Pymem.read_bytes(Address, 8), "little")
+        return int.from_bytes(self.Pymem.read_bytes(Address, 4), "little")
+
+    def isValidPointer(self, Address: int, is64Bit: bool = None) -> bool:
+        try:
+            if type(Address) == str:
+                Address = self.h2d(Address)
+            self.Pymem.read_bytes(self.DRP(Address, is64Bit), 1)
+            return True
+        except:
+            return False
+
+    def GetModules(self) -> list:
+        return list(self.Pymem.list_modules())
+
+    def getAddressFromName(self, Address: str) -> int:
+        if type(Address) == int:
+            return Address
+        AddressBase = 0
+        AddressOffset = 0
+        for i in self.GetModules():
+            if i.name in Address:
+                AddressBase = i.lpBaseOfDll
+                AddressOffset = self.h2d(Address.replace(i.name + "+", ""))
+                AddressNamed = AddressBase + AddressOffset
+                return AddressNamed
+            print("\033[91mAdress failed: \033[0m" + Address + " Line Rsp1")
+            time.sleep(10)
+            exit() 
+
+        return Address
+
+    def getNameFromAddress(self, Address: int) -> str:
+        memoryInfo = pymem.memory.virtual_query(self.Pymem.process_handle, Address)
+        BaseAddress = memoryInfo.BaseAddress
+        NameOfDLL = ""
+        AddressOffset = 0
+        for i in self.GetModules():
+            if i.lpBaseOfDll == BaseAddress:
+                NameOfDLL = i.name
+                AddressOffset = Address - BaseAddress
+                break
+        if NameOfDLL == "":
+            return Address
+        NameOfAddress = NameOfDLL + "+" + self.d2h(AddressOffset)
+        return NameOfAddress
+
+    def getRawProcesses(self):
+        toreturn = []
+        for i in pymem.process.list_processes():
+            toreturn.append(
+                [
+                    i.cntThreads,
+                    i.cntUsage,
+                    i.dwFlags,
+                    i.dwSize,
+                    i.pcPriClassBase,
+                    i.szExeFile,
+                    i.th32DefaultHeapID,
+                    i.th32ModuleID,
+                    i.th32ParentProcessID,
+                    i.th32ProcessID,
+                ]
+            )
+        return toreturn
+
+    def SimpleGetProcesses(self):
+        toreturn = []
+        for i in self.getRawProcesses():
+            toreturn.append({"Name": i[5].decode(), "Threads": i[0], "ProcessId": i[9]})
+        return toreturn
+
+    def YieldForProgram(self, programName, AutoOpen: bool = False, Limit=1):
+        Count = 0
+        while True:
+            if Count >= Limit:
+                return False
+            ProcessesList = self.SimpleGetProcesses()
+            for i in ProcessesList:
+                if i["Name"] == programName:
+
+                    if AutoOpen:
+                        self.Pymem.open_process_from_id(i["ProcessId"])
+                        self.ProgramName = programName
+                        self.Handle = self.Pymem.process_handle
+                        self.is64bit = pymem.process.is_64_bit(self.Handle)
+                        self.ProcessID = self.Pymem.process_id
+                        self.PID = self.ProcessID
+                    return True
+            time.sleep(1)
+            Count += 1
+
+    def ReadPointer(
+        self, BaseAddress: int, Offsets_L2R: list, is64Bit: bool = None
+    ) -> int:
+        x = self.DRP(BaseAddress, is64Bit)
+        y = Offsets_L2R
+        z = x
+        if y == None or len(y) == 0:
+            return z
+        count = 0
+        for i in y:
+            try:
+                print(self.d2h(x + i))
+                print(self.d2h(i))
+                z = self.DRP(z + i, is64Bit)
+                count += 1
+                print(self.d2h(z))
+            except:
+                print("\033[91mNo index offset: \033[0m" + str(count) + " Rsp2")
+                time.sleep(10)
+                exit() 
+        
+            return z
+        return z
+
+
+    def GetMemoryInfo(self, Address: int, Handle: int = None):
+        if Handle:
+            return pymem.memory.virtual_query(Handle, Address)
+        else:
+            return pymem.memory.virtual_query(self.Handle, Address)
+
+    def MemoryInfoToDictionary(self, MemoryInfo):
+        return {
+            "BaseAddress": MemoryInfo.BaseAddress,
+            "AllocationBase": MemoryInfo.AllocationBase,
+            "AllocationProtect": MemoryInfo.AllocationProtect,
+            "RegionSize": MemoryInfo.RegionSize,
+            "State": MemoryInfo.State,
+            "Protect": MemoryInfo.Protect,
+            "Type": MemoryInfo.Type,
+        }
+
+    def SetProtection(
+        self,
+        Address: int,
+        ProtectionType=0x40,
+        Size: int = 4,
+        OldProtect=ctypes.c_ulong(0),
+    ):
+        pymem.ressources.kernel32.VirtualProtectEx(
+            self.Pymem.process_handle,
+            Address,
+            Size,
+            ProtectionType,
+            ctypes.byref(OldProtect),
+        )
+        return OldProtect
+
+    def ChangeProtection(
+        self,
+        Address: int,
+        ProtectionType=0x40,
+        Size: int = 4,
+        OldProtect=ctypes.c_ulong(0),
+    ):
+        return self.SetProtection(Address, ProtectionType, Size, OldProtect)
+
+    def GetProtection(self, Address: int):
+        return self.GetMemoryInfo(Address).Protect
+
+    def KnowProtection(self, Protection):
+        if Protection == 0x10:
+            return "PAGE_EXECUTE"
+        if Protection == 0x20:
+            return "PAGE_EXECUTE_READ"
+        if Protection == 0x40:
+            return "PAGE_EXECUTE_READWRITE"
+        if Protection == 0x80:
+            return "PAGE_EXECUTE_WRITECOPY"
+        if Protection == 0x01:
+            return "PAGE_NOACCESS"
+        if Protection == 0x02:
+            return "PAGE_READONLY"
+        if Protection == 0x04:
+            return "PAGE_READWRITE"
+        if Protection == 0x08:
+            return "PAGE_WRITECOPY"
+        if Protection == 0x100:
+            return "PAGE_GUARD"
+        if Protection == 0x200:
+            return "PAGE_NOCACHE"
+        if Protection == 0x400:
+            return "PAGE_WRITECOMBINE"
+        if Protection in ["PAGE_EXECUTE", "execute", "e"]:
+            return 0x10
+        if Protection in [
+            "PAGE_EXECUTE_READ",
+            "execute read",
+            "read execute",
+            "execute_read",
+            "read_execute",
+            "er",
+            "re",
+        ]:
+            return 0x20
+        if Protection in [
+            "PAGE_EXECUTE_READWRITE",
+            "execute read write",
+            "execute write read",
+            "write execute read",
+            "write read execute",
+            "read write execute",
+            "read execute write",
+            "erw",
+            "ewr",
+            "wre",
+            "wer",
+            "rew",
+            "rwe",
+        ]:
+            return 0x40
+        if Protection in [
+            "PAGE_EXECUTE_WRITECOPY",
+            "execute copy write",
+            "execute write copy",
+            "write execute copy",
+            "write copy execute",
+            "copy write execute",
+            "copy execute write",
+            "ecw",
+            "ewc",
+            "wce",
+            "wec",
+            "cew",
+            "cwe",
+        ]:
+            return 0x80
+        if Protection in ["PAGE_NOACCESS", "noaccess", "na", "n"]:
+            return 0x01
+        if Protection in ["PAGE_READONLY", "readonly", "ro", "r"]:
+            return 0x02
+        if Protection in ["PAGE_READWRITE", "read write", "write read", "wr", "rw"]:
+            return 0x04
+        if Protection in ["PAGE_WRITECOPY", "write copy", "copy write", "wc", "cw"]:
+            return 0x08
+        if Protection in ["PAGE_GUARD", "pg", "guard", "g"]:
+            return 0x100
+        if Protection in ["PAGE_NOCACHE", "nc", "nocache"]:
+            return 0x200
+        if Protection in ["PAGE_WRITECOMBINE", "write combine", "combine write"]:
+            return 0x400
+        return Protection
+
+    def Suspend(self, pid: int = None):
+        kernel32 = ctypes.WinDLL("kernel32.dll")
+        if pid:
+            kernel32.DebugActiveProcess(pid)
+        if self.PID:
+            kernel32.DebugActiveProcess(self.PID)
+
+    def Resume(self, pid: int = None):
+        kernel32 = ctypes.WinDLL("kernel32.dll")
+        if pid:
+            kernel32.DebugActiveProcessStop(pid)
+        if self.PID:
+            kernel32.DebugActiveProcessStop(self.PID)
+
+Redeemer = Redeemer()
+
+
+
+print(Colorate.Horizontal(Colors.purple_to_blue, "/\Compiled Waiting For Roblox to open", 1))
+while True:
+    
+    if Redeemer.YieldForProgram("Windows10Universal.exe", True, 2):
+        print(Colorate.Horizontal(Colors.purple_to_blue, "/\Found Roblox (UWP)", 1))
+        break
+    elif Redeemer.YieldForProgram("RobloxPlayerBeta.exe", True, 2):
+        print(Colorate.Horizontal(Colors.purple_to_blue, "/\Found Roblox (Web)", 1))
+        break
+    time.sleep(0.3) 
+
+
+                
+
+def ReadRobloxString(ExpectedAddress: int) -> str:
+        try:
+            StringCount = Redeemer.Pymem.read_int(ExpectedAddress + 0x10)
+            if StringCount > 15:
+                return Redeemer.Pymem.read_string(Redeemer.DRP(ExpectedAddress), StringCount)
+            return Redeemer.Pymem.read_string(ExpectedAddress, StringCount)
+        except TypeError as e:
+            print(f"TypeError: {e} \n" + "Rsp3")
+            time.sleep(10)
+            exit() 
+
+def GetClassName(Instance: int) -> str:
+    ExpectedAddress = Redeemer.DRP(Redeemer.DRP(Instance + 0x18) + 8)
+    return ReadRobloxString(ExpectedAddress)
+
+def setParent(Instance, Parent, parentOffset, childrenOffset):
+    Redeemer.Pymem.write_longlong(Instance + parentOffset, Parent)
+    newChildren = Redeemer.Pymem.allocate(0x400)
+    Redeemer.Pymem.write_longlong(newChildren + 0, newChildren + 0x40)
+
+    ptr = Redeemer.Pymem.read_longlong(Parent + childrenOffset)
+    childrenStart = Redeemer.Pymem.read_longlong(ptr)
+    childrenEnd = Redeemer.Pymem.read_longlong(ptr + 8)
+
+    if childrenStart == 0 or childrenEnd == 0 or childrenEnd <= childrenStart:
+        print("\033[91mError: Invalid children range. Line: Rsp4\033[0m")
+        time.sleep(10)
+        exit() 
+
+    length = childrenEnd - childrenStart
+    if length < 0:
+        print("\033[91mError: Negative length for children array. Line: Rsp5\033[0m")
+        time.sleep(10)
+        exit() 
+
+    b = Redeemer.Pymem.read_bytes(childrenStart, length)
+    Redeemer.Pymem.write_bytes(newChildren + 0x40, b, len(b))
+    e = newChildren + 0x40 + length
+    Redeemer.Pymem.write_longlong(e, Instance)
+    Redeemer.Pymem.write_longlong(e + 8, Redeemer.Pymem.read_longlong(Instance + 0x10))
+    e = e + 0x10
+    Redeemer.Pymem.write_longlong(newChildren + 0x8, e)
+    Redeemer.Pymem.write_longlong(newChildren + 0x10, e)
+
+
+
+def inject(): 
+    print("Injecting..")
+    childrenOffset = 0
+    players = 0
+    nameOffset = 0
+    valid = False
+    results = Redeemer.AOBSCANALL(
+        "506C6179657273??????????????????07000000000000000F", True
+    )
+    if not results:
+        print("\033[91mUnknown error please rerun the program! Line: Rsp6\033[0m")
+        time.sleep(10)
+        exit() 
+
+    for rn in results:
+        result = rn
+        if not result:
+            print("\033[91mError: please rerun the program! Line: Rsp7\033[0m")
+            time.sleep(10)
+            exit()
+        bres = Redeemer.d2h(result)
+        aobs = ""
+        for i in range(1, 16 + 1):
+            aobs = aobs + bres[i - 1 : i]
+        aobs = Redeemer.hex2le(aobs)
+        first = False
+        res = Redeemer.AOBSCANALL(aobs, True)
+        if res:
+            valid = False
+            for i in res:
+                try:
+                    result = i
+                    for j in range(1, 10 + 1):
+                        address = result - (8 * j)
+                        if not Redeemer.isValidPointer(address):
+                            continue
+                        ptr = Redeemer.Pymem.read_longlong(address)
+                        if Redeemer.isValidPointer(ptr):
+                            address = ptr + 8
+                            if not Redeemer.isValidPointer(address):
+                                continue
+                            ptr = Redeemer.Pymem.read_longlong(address)
+                            if (
+                                Redeemer.Pymem.read_string(ptr) == "Players"
+                            ): 
+                                if not first:
+                                    first = True
+                                    players = (result - (8 * j)) - 0x18
+                                    nameOffset = result - players
+                                else:
+                                    players = (result - (8 * j)) - 0x18
+                                    nameOffset = result - players
+                                    break
+                    if valid:
+                        break
+                except:
+                    pass
+            if valid:
+                break
+        
+    if players == 0:
+        print("\033[91mFailed to hook please rerun the program! Line: Rsp8\033[0m")
+        while True:
+                Rsp8 = input("Do you want to close Roblox? (y/n): ").lower()
+                if Rsp8 in ["y", "Y", "n", "N"]:
+                    if Rsp8 in ["y", "Y"]:
+                        CloseRBLX()
+                        exit()
+                    elif Rsp8 in ["n", "N"]:
+                        exit()
+                return None
+    parentOffset = 0
+    for i in range(0x10, 0x120 + 8, 8):
+        address = players + i
+        if not Redeemer.isValidPointer(address):
+            continue
+        ptr = Redeemer.Pymem.read_longlong(address)
+        if ptr != 0 and ptr % 4 == 0:
+            address = ptr + 8
+            if not Redeemer.isValidPointer(address):
+                continue
+            if Redeemer.Pymem.read_longlong(address) == ptr:
+                parentOffset = i
+                break
+    if parentOffset == 0:
+        print("\033[91mNo parent offset please rerun the program! Line: Rsp9\033[0m")
+        while True:
+                Rsp9 = input("Do you want to close Roblox? (y/n): ").lower()
+                if Rsp9 in ["y", "Y", "n", "N"]:
+                    
+                    if Rsp9 in ["y", "Y"]:
+                        CloseRBLX()
+                        exit()
+                    elif Rsp9 in ["n", "N"]:
+                        exit()
+
+                return None
+    dataModel = Redeemer.Pymem.read_longlong(players + parentOffset)
+    childrenOffset = 0
+    for i in range(0x10, 0x200 + 8, 8):
+        ptr = Redeemer.Pymem.read_longlong(dataModel + i)
+        if ptr:
+            try:
+                childrenStart = Redeemer.Pymem.read_longlong(ptr)
+                childrenEnd = Redeemer.Pymem.read_longlong(ptr + 8)
+                if childrenStart and childrenEnd:
+                    if (
+                        childrenEnd > childrenStart
+                        and childrenEnd - childrenStart > 1
+                        and childrenEnd - childrenStart < 0x1000
+                    ):
+                        childrenOffset = i
+                        break
+            except:
+                pass
+    print(Colorate.Horizontal(Colors.purple_to_blue, "/\Done!", 1))
+
+    def GetNameAddress(Instance: int) -> int:
+        try:
+        
+                ExpectedAddress = Redeemer.DRP(Instance + nameOffset, True)
+
+
+                return ExpectedAddress
+        except TypeError as e:
+            print(f"TypeError: {e} \n" + "Line: Rsp10")
+            time.sleep(10)
+            exit()
+
+        
+
+    def GetName(Instance: int) -> str:
+        ExpectedAddress = GetNameAddress(Instance)
+        return ReadRobloxString(ExpectedAddress)
+
+    def GetChildren(Instance: int) -> str:
+        ChildrenInstance = []
+        InstanceAddress = Instance
+        if not InstanceAddress:
+            return False
+        ChildrenStart = Redeemer.DRP(InstanceAddress + childrenOffset, True)
+        if ChildrenStart == 0:
+            return []
+        ChildrenEnd = Redeemer.DRP(ChildrenStart + 8, True)
+        OffsetAddressPerChild = 0x10
+        CurrentChildAddress = Redeemer.DRP(ChildrenStart, True)
+        for i in range(0, 9000):
+            if i == 8999:
+                print("\033[91mInvalid children please rerun the program! Line: Rsp11\033[0m")
+                time.sleep(10)
+                exit()
+
+            if CurrentChildAddress == ChildrenEnd:
+                break
+            ChildrenInstance.append(Redeemer.Pymem.read_longlong(CurrentChildAddress))
+            CurrentChildAddress += OffsetAddressPerChild
+        return ChildrenInstance
+
+    def GetParent(Instance: int) -> int:
+        return Redeemer.DRP(Instance + parentOffset, True)
+
+    def FindFirstChild(Instance: int, ChildName: str) -> int:
+        ChildrenOfInstance = GetChildren(Instance)
+        for i in ChildrenOfInstance:
+            if GetName(i) == ChildName:
+                return i
+
+    def FindFirstChildOfClass(Instance: int, ClassName: str) -> int:
+        ChildrenOfInstance = GetChildren(Instance)
+        for i in ChildrenOfInstance:
+            if GetClassName(i) == ClassName:
+                return i
+
+    class toInstance:
+        def __init__(self, address: int = 0):
+            self.Address = address
+            self.Self = address
+            self.Name = GetName(address)
+            self.ClassName = GetClassName(address)
+            self.Parent = GetParent(address)
+
+        def getChildren(self):
+            return GetChildren(self.Address)
+
+        def findFirstChild(self, ChildName):
+            return FindFirstChild(self.Address, ChildName)
+
+        def findFirstClass(self, ChildClass):
+            return FindFirstChildOfClass(self.Address, ChildClass)
+
+        def setParent(self, Parent):
+            setParent(self.Address, Parent)
+
+        def GetChildren(self):
+            return GetChildren(self.Address)
+
+        def FindFirstChild(self, ChildName):
+            return FindFirstChild(self.Address, ChildName)
+
+        def FindFirstClass(self, ChildClass):
+            return FindFirstChildOfClass(self.Address, ChildClass)
+
+        def SetParent(self, Parent):
+            setParent(self.Address, Parent, parentOffset, childrenOffset)
+
+    players = toInstance(players)
+    game = toInstance(dataModel)
+    localPlayerOffset = 0
+    
+    for i in range(0x10, 0x600 + 4, 4):
+        ptr = Redeemer.Pymem.read_longlong(players.Self + i)
+        if not Redeemer.isValidPointer(ptr):
+            continue
+        if Redeemer.Pymem.read_longlong(ptr + parentOffset) == players.Self:
+            localPlayerOffset = i
+            break
+        
+    localPlayer = toInstance(Redeemer.DRP(players.Self + localPlayerOffset))
+    animateScript = None
+    workspace = toInstance(FindFirstChildOfClass(dataModel, "Workspace"))
+    
+    if workspace is None:
+        print("\033[91mError: 'Workspace' not found. Line: Rsp12\033[0m")
+        time.sleep(10)
+        exit()
+    else:
+        print(f"Workspace found: {workspace.Name}")
+        
+    print("Children in Workspace:")
+    for child in workspace.GetChildren():
+        print(f"  - {GetName(child)} (Class: {GetClassName(child)})")
+    character = None
+    print(f"LocalPlayer name: {localPlayer.Name}")
+    character_found = False
+
+    for obj in workspace.GetChildren():
+        obj_name = GetName(obj)
+        obj_class = GetClassName(obj)
+        print(f"Examining child: {obj_name} (Class: {obj_class})")
+        if obj_name == localPlayer.Name:
+            character = toInstance(obj)
+            print(f"Character model found: {obj_name} (Class: {obj_class})")
+            character_found = True
+            break 
+    
+    if not character_found:
+        print("\033[91mError: 'Character' not found in Workspace. Line: Rsp13\033[0m")
+        time.sleep(10)
+        exit()
+        
+    animateScript = character.findFirstChild("Animate")
+    if animateScript is None:
+        print("\033[91mError: 'Animate' LocalScript not found in character. Line: Rsp14\033[0m")
+        time.sleep(10)
+        exit()
+        
+    print("/\Attaching process to: Animate")
+    targetScript = toInstance(animateScript)
+    injectScript = None
+    results = Redeemer.AOBSCANALL("496E6A656374????????????????????06", True)
+    if results == []:
+        print("\033[35mPlease find another teleporter! Line: Rsp15\033[0m")
+        time.sleep(10)
+        exit()
+    for rn in results:
+        result = rn
+        bres = Redeemer.d2h(result)
+        aobs = ""
+        for i in range(1, 16 + 1):
+            aobs = aobs + bres[i - 1 : i]
+        aobs = Redeemer.hex2le(aobs)
+        first = False
+        res = Redeemer.AOBSCANALL(aobs, True)
+        if res:
+            valid = False
+            for i in res:
+                result = i
+                if (
+                    Redeemer.Pymem.read_longlong(result - nameOffset + 8)
+                    == result - nameOffset
+                ):
+                    injectScript = result - nameOffset
+                    valid = True
+                    break
+        if valid:
+            break
+    injectScript = toInstance(injectScript)
+    print("/\Successfully attached :", Redeemer.d2h(injectScript.Self))
+    b = Redeemer.Pymem.read_bytes(injectScript.Self + 0x100, 0x150)
+    Redeemer.Pymem.write_bytes(targetScript.Self + 0x100, b, len(b))
+    playerScripts = toInstance(localPlayer.FindFirstClass("PlayerScripts"))
+    if playerScripts is None:
+        print("\033[91mError: 'PlayerScripts' not found. Line: Rsp16\033[0m")
+        time.sleep(10)
+        exit()
+    targetScript.SetParent(playerScripts.Self)
+    print("/\Script moved to PlayerScripts")
+    return True
+
+print("Loaded Reedermer")
+
+
+
+customtkinter.set_appearance_mode("System")  # Modes: "System" (standard), "Dark", "Light"
+customtkinter.set_default_color_theme("redeemer.json")  # Themes: "blue" (standard), "green", "dark-blue"
+
+
+
+class App(customtkinter.CTk):
+    def open_discord(self):
+        webbrowser.open('https://discord.gg/redeemerog')  # open island boy kissing video
+        
+    def CheckStatus(self):
+        time.sleep(0.2)
+        pastebin = 'https://pastebin.com/raw/dhmuBXGq'
+        time.sleep(0.2)
+        try:
+            response = requests.get(pastebin, timeout=5) 
+            response.raise_for_status()
+            time.sleep(0.2)
+            status = response.text
+            time.sleep(0.2)
+        except requests.RequestException as e:
+            print(f"Error: {e}")
+            return "Error: Failed to fetch status"
+        
+        if status == "P":
+            return "Patched"
+        elif status == "NP":
+            return "Not Patched"
+        else:
+            return "Unknown"
+
+#print(Colorate.Horizontal(Colors.purple_to_blue, "Not Pacthed.", 1))
+
+
+
+    def lmao(self):
+
+        if inject():
+            print(Colorate.Horizontal(Colors.purple_to_blue, "[.] Hooked have fun :)", 1))
+            self.main_button_1.configure(state="disabled")
+            pass
+        else:
+            print("\033[35mError during injection! Line: Rsp17\033[0m")
+            time.sleep(10)
+            exit()      
+    def __init__(self):
+        super().__init__()
+        
+        self.title(f"Redeemer {current_version}")
+        self.geometry(f"{525}x{314}")
+        self.resizable(True, True)  
+
+        # configure grid layout (4x4)
+        self.grid_columnconfigure(1, weight=1)
+        self.grid_columnconfigure((2, 3), weight=0)
+        self.grid_rowconfigure((0, 1, 2), weight=1)
+
+        # create sidebar frame with widgets
+        self.sidebar_frame = customtkinter.CTkFrame(self, width=140, corner_radius=0)
+        self.sidebar_frame.grid(row=0, column=0, rowspan=4, sticky="nsew")
+        self.sidebar_frame.grid_rowconfigure(4, weight=1)
+
+        self.logo_label = customtkinter.CTkLabel(self.sidebar_frame, text="Redeemer", font=customtkinter.CTkFont(size=10, weight="bold"))
+        self.logo_label.grid(row=0, column=0, padx=10, pady=(10, 5))
+
+        self.sidebar_button_1 = customtkinter.CTkButton(self.sidebar_frame, text="Open Discord", command=self.open_discord)
+        self.sidebar_button_1.grid(row=2, column=0, padx=10, pady=5)
+
+        self.appearance_mode_label = customtkinter.CTkLabel(self.sidebar_frame, text=f"Status: {self.CheckStatus()}", anchor="w")
+        self.appearance_mode_label.grid(row=3, column=0, padx=10, pady=(10, 0))
+
+        self.main_button_1 = customtkinter.CTkButton(master=self, text="Inject", border_width=2, text_color=("gray10", "#DCE4EE"), command=self.lmao)
+        self.main_button_1.grid(row=3, column=1, padx=(10, 10), pady=(10, 10), sticky="nsew")
+
+
+        #self.sidebar_button_2 = customtkinter.CTkButton(self.sidebar_frame, text="Check Redeemer Status", border_width=2, text_color=("gray10", "#DCE4EE"), command=self.CheckStatus)
+        #self.sidebar_button_2.grid(row=3, column=0, padx=(10, 10), pady=(10, 10), sticky="nsew")
+
+        # update log
+        #current_version = 'V4.0'
+        self.textbox = customtkinter.CTkTextbox(self, width=250)
+        self.textbox.grid(row=0, column=1, padx=(10, 0), pady=(10, 0), sticky="nsew")
+        self.textbox.insert("end", f"""Update Log:
+        [.]  {current_version} Release
+        [.]  ToolLess Injection
+        [.]  Faster Injection
+        [.]  UI""")
+        self.textbox.configure(state="disabled")
+
+    def change_appearance_mode_event(self, new_appearance_mode: str):
+        customtkinter.set_appearance_mode(new_appearance_mode)
+
+    def sidebar_button_event(self):
+        print("sidebar_button click")
+
+
+if __name__ == "__main__":
+    app = App()
+    app.mainloop()
