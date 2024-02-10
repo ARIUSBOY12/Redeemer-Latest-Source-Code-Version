@@ -42,7 +42,7 @@ def Update():
             latest_source = response.text
             with open("ui.py", "w", encoding="utf-8") as file:
                 file.write(latest_source)
-            print("UI updated successfully.")
+            print("Installed the latest version successfully.")
             time.sleep(10)
         else:
             print("Failed to fetch the latest source code.")
@@ -60,7 +60,7 @@ def undetectname():
 
 undetectname()
 
-current_version = 'V4.1'
+current_version = 'V4.0'
 
 def PrintTitle():
     GamingTextw = r"""    
@@ -107,7 +107,7 @@ except requests.RequestException as e:
     exit()
 #CurrentVersion = 'V4.1'  #dontchange
 if latestversion > current_version:
-    print(Colorate.Horizontal(Colors.purple_to_blue, f"A new version ({latestversion}) is available. Please download the new version in our Discord Server.\nDiscord: https://discord.gg/redeemerog", 1))
+    print(Colorate.Horizontal(Colors.purple_to_blue, f"A new version ({latestversion}) is available. Installing the latest version..", 1))
     if __name__ == "__main__":
         Update()
     time.sleep(10)
