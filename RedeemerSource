@@ -60,7 +60,7 @@ def undetectname():
 
 undetectname()
 
-current_version = 'V4.0'
+current_version = 'V4.1'
 
 def PrintTitle():
     GamingTextw = r"""    
@@ -880,7 +880,7 @@ def inject():
     print("/\Script moved to PlayerScripts")
     return True
 
-print("Loaded Reedermer")
+
 
 
 
@@ -913,6 +913,7 @@ class App(customtkinter.CTk):
             return "Not Patched"
         else:
             return "Unknown"
+    
 
 #print(Colorate.Horizontal(Colors.purple_to_blue, "Not Pacthed.", 1))
 
@@ -933,7 +934,12 @@ class App(customtkinter.CTk):
         
         self.title(f"Redeemer {current_version}")
         self.geometry(f"{525}x{314}")
-        self.resizable(True, True)  
+        self.resizable(False, False)  
+        try:
+         self.iconphoto(True, PhotoImage(file="REDEEMER.png"))
+        except Exception as e:
+            print(f"Error: {e}")
+            return
 
         # configure grid layout (4x4)
         self.grid_columnconfigure(1, weight=1)
@@ -944,6 +950,8 @@ class App(customtkinter.CTk):
         self.sidebar_frame = customtkinter.CTkFrame(self, width=140, corner_radius=0)
         self.sidebar_frame.grid(row=0, column=0, rowspan=4, sticky="nsew")
         self.sidebar_frame.grid_rowconfigure(4, weight=1)
+
+
 
         self.logo_label = customtkinter.CTkLabel(self.sidebar_frame, text="Redeemer", font=customtkinter.CTkFont(size=10, weight="bold"))
         self.logo_label.grid(row=0, column=0, padx=10, pady=(10, 5))
@@ -966,10 +974,10 @@ class App(customtkinter.CTk):
         self.textbox = customtkinter.CTkTextbox(self, width=250)
         self.textbox.grid(row=0, column=1, padx=(10, 0), pady=(10, 0), sticky="nsew")
         self.textbox.insert("end", f"""Update Log:
-        [.]  {current_version} Release
-        [.]  ToolLess Injection
-        [.]  Faster Injection
-        [.]  UI""")
+[.]  {current_version} Release
+[.]  ToolLess Injection
+[.]  Faster Injection
+[.]  UI""")
         self.textbox.configure(state="disabled")
 
     def change_appearance_mode_event(self, new_appearance_mode: str):
@@ -977,8 +985,12 @@ class App(customtkinter.CTk):
 
     def sidebar_button_event(self):
         print("sidebar_button click")
+    
 
 
 if __name__ == "__main__":
     app = App()
     app.mainloop()
+    
+
+
