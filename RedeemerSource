@@ -1,5 +1,6 @@
 from tkinter import *
 import tkinter.messagebox
+import tkinter as tk
 import customtkinter
 import webbrowser
 from PIL import Image, ImageTk
@@ -8,12 +9,14 @@ from pystyle import Colors, Colorate
 from colorama import init, Fore
 import requests
 import ctypes
+import ast
 import random
 import string
 import pymem
 import time
 import re
 import os
+import json
 import psutil
 from customtkinter import *
 
@@ -21,6 +24,8 @@ from customtkinter import *
 p = psutil.Process(os.getpid())
 p.nice(psutil.HIGH_PRIORITY_CLASS)
 
+Injector_Version = '4.0'
+UI_Version = "V1"
 
 def CloseRBLX():
     UWP = Redeemer.YieldForProgram("Windows10Universal.exe")
@@ -42,13 +47,42 @@ def Update():
             latest_source = response.text
             with open("ui.py", "w", encoding="utf-8") as file:
                 file.write(latest_source)
-            print("Installed the latest version successfully.\nPlease Rerun the program.")
+            print(Colors.green,"Installed the latest version successfully!\nPlease Rerun the program.!")
             time.sleep(10)
         else:
             print("Failed to install the latest version.")
     except Exception as e:
         print(f"An error occurred: {e}")
 
+def CheckVersion():
+ time.sleep(0.2)
+ pastebin = 'https://pastebin.com/raw/iunBLXdk' # dont change. its the latest version
+ time.sleep(0.2)
+
+ try:
+     response = requests.get(pastebin)
+     time.sleep(0.2)
+     response.raise_for_status()
+     time.sleep(0.2)
+     latestversion = response.text
+ except requests.RequestException as e:
+     print(f"Error: {e}")
+     time.sleep(15)
+     exit()
+ if latestversion > Injector_Version:
+         while True:
+             Rsp0 = input(Colorate.Horizontal(Colors.purple_to_blue, f"A new version ({latestversion}) is available. Do you wish to install the latest version? (y/n) "))
+             if Rsp0 in ["y", "Y", "n", "N"]:
+                 if Rsp0 in ["y", "Y"]:
+                     time.sleep(1)
+                     if __name__ == "__main__":
+                         Update()
+                         time.sleep(10)
+                         exit()
+                 elif Rsp0 in ["n", "N"]:
+                     print("Closing the program..")
+                     time.sleep(2)
+                     exit()
 
 
 os.system("cls" if os.name == "nt" else "clear")
@@ -59,8 +93,6 @@ def undetectname():
     ctypes.windll.kernel32.SetConsoleTitleW(appname)
 
 undetectname()
-
-current_version = 'V4.1'
 
 def PrintTitle():
     GamingTextw = r"""    
@@ -75,51 +107,23 @@ def PrintTitle():
     print(Colorate.Horizontal(Colors.purple_to_blue, GamingTextw, True)) 
 
 def UpdateLog():
-            UpdateLogs = rf"""   
-Update Log:      
+            UpdateLogs = rf"""Update Log:
 
-{current_version}
+Injection Updates:
+
+· Injector version: {Injector_Version}
 · Faster Injection
-· ToolLess
+· ToolLess Injection
 · Auto Update
-· GUI
-
-
 """.format()    
                                                      
             print(Colorate.Horizontal(Colors.purple_to_blue, UpdateLogs, True)) 
 
 PrintTitle()
     
-UpdateLog()
-time.sleep(0.2)
-pastebin = 'https://pastebin.com/raw/iunBLXdk' # dont change. its the latest version
-time.sleep(0.2)
+CheckVersion()
 
-try:
-    response = requests.get(pastebin)
-    time.sleep(0.2)
-    response.raise_for_status()
-    time.sleep(0.2)
-    latestversion = response.text
-except requests.RequestException as e:
-    print(f"Error: {e}")
-    time.sleep(15)
-    exit()
-if latestversion > current_version:
-        while True:
-            Rsp0 = input(Colorate.Horizontal(Colors.purple_to_blue, f"A new version ({latestversion}) is available. Do you wish to install the latest version? (y/n) "))
-            if Rsp0 in ["y", "Y", "n", "N"]:
-                if Rsp0 in ["y", "Y"]:
-                    time.sleep(1)
-                    if __name__ == "__main__":
-                        Update()
-                    time.sleep(10)
-                    exit()
-                elif Rsp0 in ["n", "N"]:
-                    print("Closing the program..")
-                    time.sleep(2)
-                    exit()
+UpdateLog()
 
 print("")
 print(Colorate.Horizontal(Colors.purple_to_blue, "Made by Xavier✞ | NIKYISME | Hisako | Darian | Bobly | Cipher | Klay", 1))
@@ -884,28 +888,55 @@ def inject():
 
 
 
-customtkinter.set_appearance_mode("System")  # Modes: "System" (standard), "Dark", "Light"
-customtkinter.set_default_color_theme("redeemer.json")  # Themes: "blue" (standard), "green", "dark-blue"
+def read_theme_from_file():
+    try:
+        with open("Theme.py", "r") as f:
+            theme_dict = json.load(f)
+            theme_path = theme_dict
+            if theme_path and os.path.exists(theme_path) and theme_path.endswith('.json'):
+                return theme_dict
+            else:
+                print("Error: Theme path does not exist or is not a valid JSON file.\nApplying Default Theme..")
+                return None
+    except FileNotFoundError:
+        print("Error: Theme.py file not found.")
+        return None
+    except json.JSONDecodeError as e:
+        print(f"Error decoding JSON: {e}")
+        return None
+    except Exception as e:
+        print(f"Error: {e}")
+        return None
+
+theme_dict = read_theme_from_file()
+
+if theme_dict:
+    customtkinter.set_default_color_theme(theme_dict)
+else:
+    customtkinter.set_default_color_theme("redeemer.json") # Default theme path
 
 
 
 class App(customtkinter.CTk):
+    def __init__(self):
+        super().__init__()
+
     def open_discord(self):
-        webbrowser.open('https://discord.gg/redeemerog')  # open island boy kissing video
-        
+        webbrowser.open('https://discord.gg/redeemerog')
+
     def CheckStatus(self):
         time.sleep(0.2)
         pastebin = 'https://pastebin.com/raw/dhmuBXGq'
         time.sleep(0.2)
         try:
-            response = requests.get(pastebin, timeout=5) 
+            response = requests.get(pastebin) 
             response.raise_for_status()
             time.sleep(0.2)
             status = response.text
             time.sleep(0.2)
         except requests.RequestException as e:
             print(f"Error: {e}")
-            return "Error: Failed to fetch status"
+            return "Failed to fetch status"
         
         if status == "P":
             return "Patched"
@@ -913,14 +944,8 @@ class App(customtkinter.CTk):
             return "Not Patched"
         else:
             return "Unknown"
-    
-
-#print(Colorate.Horizontal(Colors.purple_to_blue, "Not Pacthed.", 1))
-
-
 
     def lmao(self):
-
         if inject():
             print(Colorate.Horizontal(Colors.purple_to_blue, "[.] Hooked have fun :)", 1))
             self.main_button_1.configure(state="disabled")
@@ -928,15 +953,17 @@ class App(customtkinter.CTk):
         else:
             print("\033[35mError during injection! Line: Rsp17\033[0m")
             time.sleep(10)
-            exit()      
+            exit()  
+
     def __init__(self):
         super().__init__()
         
-        self.title(f"Redeemer {current_version}")
+        self.title(f"Redeemer {Injector_Version}")
         self.geometry(f"{525}x{314}")
         self.resizable(False, False)  
+        self.configure(background="white")
         try:
-         self.iconphoto(True, PhotoImage(file="REDEEMER.png"))
+            self.iconphoto(True, PhotoImage(file="REDEEMER.png"))
         except Exception as e:
             print(f"Error: {e}")
             return
@@ -951,8 +978,6 @@ class App(customtkinter.CTk):
         self.sidebar_frame.grid(row=0, column=0, rowspan=4, sticky="nsew")
         self.sidebar_frame.grid_rowconfigure(4, weight=1)
 
-
-
         self.logo_label = customtkinter.CTkLabel(self.sidebar_frame, text="Redeemer", font=customtkinter.CTkFont(size=10, weight="bold"))
         self.logo_label.grid(row=0, column=0, padx=10, pady=(10, 5))
 
@@ -965,32 +990,123 @@ class App(customtkinter.CTk):
         self.main_button_1 = customtkinter.CTkButton(master=self, text="Inject", border_width=2, text_color=("gray10", "#DCE4EE"), command=self.lmao)
         self.main_button_1.grid(row=3, column=1, padx=(10, 10), pady=(10, 10), sticky="nsew")
 
+        self.sidebar_button_2 = customtkinter.CTkButton(self.sidebar_frame, text="Settings", command=self.open_settings)
+        self.sidebar_button_2.grid(row=5, column=0, padx=10, pady=5)
 
-        #self.sidebar_button_2 = customtkinter.CTkButton(self.sidebar_frame, text="Check Redeemer Status", border_width=2, text_color=("gray10", "#DCE4EE"), command=self.CheckStatus)
-        #self.sidebar_button_2.grid(row=3, column=0, padx=(10, 10), pady=(10, 10), sticky="nsew")
-
-        # update log
-        #current_version = 'V4.0'
         self.textbox = customtkinter.CTkTextbox(self, width=250)
         self.textbox.grid(row=0, column=1, padx=(10, 0), pady=(10, 0), sticky="nsew")
         self.textbox.insert("end", f"""Update Log:
-[.]  {current_version} Release
+                                                  
+Injector:
+                            
+[.]  Injector version: {Injector_Version}
 [.]  ToolLess Injection
 [.]  Faster Injection
-[.]  UI""")
+    
+UI:
+
+[.]  UI version: {UI_Version}
+[.]  Settings
+[.]  Status
+[.]  Custom UI
+
+""")
         self.textbox.configure(state="disabled")
 
-    def change_appearance_mode_event(self, new_appearance_mode: str):
-        customtkinter.set_appearance_mode(new_appearance_mode)
 
-    def sidebar_button_event(self):
-        print("sidebar_button click")
-    
+    def open_settings(self):
+        settings_window = SettingsWindow()
+        settings_window.geometry(f"{525}x{314}")
+
+class SettingsWindow(tk.Toplevel):
+    def __init__(self):
+        super().__init__()
+        self.title("Settings")
+        self.configure(background="black")
+        self.geometry(f"{525}x{314}")
+        self.resizable(False, False)
+
+        self.button = customtkinter.CTkButton(self, text="Custom UI", command=self.open_custom_ui)
+        self.button.grid(row=0, column=0, padx=10, pady=10)
+
+    def open_custom_ui(self):
+        custom_ui_window = CustomUIWindow(self)
+        custom_ui_window.geometry(f"{525}x{314}")
+        self.resizable(False, False)
+
+class CustomUIWindow(tk.Toplevel):
+    def change_background(self, color):
+        self.app_instance.configure(bg=color) 
+
+def update_theme_file(path):
+    with open("Theme.py", "w") as f:
+        f.write(f'"{path}"')
+
+class CustomUIWindow(tk.Toplevel):
+    def __init__(self, parent):
+        super().__init__(parent)
+        self.title("Custom UI")
+        self.geometry(f"{525}x{314}")
+        self.resizable(False, False)
+        self.configure(background="black")        
+        self.app_instance = parent
+
+        self.text_box = tk.Text(self, width=40, height=5.)
+        self.text_box.grid(row=0, column=0, padx=10, pady=5, sticky="ew")
+
+        browse_button = tk.Button(self, text="Browse", command=self.browse_file)
+        browse_button.grid(row=1, column=0, padx=10, pady=5, sticky="ew")
+
+        update_button = tk.Button(self, text="Update Theme", command=self.on_button_click)
+        update_button.grid(row=2, column=0, padx=10, pady=5, sticky="ew")
+
+    def browse_file(self):
+        file_path = filedialog.askopenfilename(filetypes=[("JSON files", "*.json")])
+        if file_path:
+            self.text_box.delete("1.0", "end")
+            self.text_box.insert("1.0", file_path)
+
+    def change_background(self, color):
+        self.app_instance.configure(bg=color) 
+
+    def update_theme_file(self, path):
+        try:
+            with open("Theme.py", "w") as f:
+                f.write(f'"{path}"')
+        except Exception as e:
+            print(f"Error updating theme file: {e}")
+
+    def validate_json(self, path):
+        if not os.path.exists(path):
+            print("Error: The specified file path does not exist.")
+            return False
+        elif not path.endswith(".json"):
+            print("Error: The file is not a JSON file.")
+            return False
+        else:
+            try:
+                with open(path, "r") as f:
+                    json.load(f)
+                return True
+            except json.JSONDecodeError:
+                print("Error: Invalid JSON format.")
+                return False
+
+    def on_button_click(self):
+        path = self.text_box.get("1.0", "end").strip()
+        if self.validate_json(path):
+            self.update_theme_file(path)
+            print(Colors.green, "Theme file updated successfully!")
+            print(Colors.green, "Please close the program and open it again to apply the new theme.")
+        else:
+            print("Theme file was not updated.")
+
 
 
 if __name__ == "__main__":
     app = App()
     app.mainloop()
-    
+
+
 
 
