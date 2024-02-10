@@ -60,7 +60,7 @@ def undetectname():
 
 undetectname()
 
-current_version = 'V4.0'
+current_version = 'V4.1'
 
 def PrintTitle():
     GamingTextw = r"""    
