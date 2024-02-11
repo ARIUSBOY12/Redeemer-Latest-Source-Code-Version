@@ -24,8 +24,9 @@ from customtkinter import *
 p = psutil.Process(os.getpid())
 p.nice(psutil.HIGH_PRIORITY_CLASS)
 
-Injector_Version = '4.0'
+Injector_Version = 'V4.0'
 UI_Version = "V1"
+Current_Update = ""
 
 def CloseRBLX():
     UWP = Redeemer.YieldForProgram("Windows10Universal.exe")
@@ -40,6 +41,8 @@ def CloseRBLX():
         print("/\Roblox process has not been found")
         exit()
 
+
+
 def Update():
     try:
         response = requests.get("https://raw.githubusercontent.com/ARIUSBOY12/Redeemer-Latest-Source-Code-Version/main/RedeemerSource")
@@ -47,12 +50,14 @@ def Update():
             latest_source = response.text
             with open("ui.py", "w", encoding="utf-8") as file:
                 file.write(latest_source)
-            print(Colors.green,"Installed the latest version successfully!\nPlease Rerun the program.!")
+            print(Colors.green,"Installion was successfully!\nPlease Rerun the progra.")
             time.sleep(10)
         else:
-            print("Failed to install the latest version.")
+            print("Installion Failed.")
     except Exception as e:
         print(f"An error occurred: {e}")
+
+
 
 def CheckVersion():
  time.sleep(0.2)
@@ -71,7 +76,38 @@ def CheckVersion():
      exit()
  if latestversion > Injector_Version:
          while True:
-             Rsp0 = input(Colorate.Horizontal(Colors.purple_to_blue, f"A new version ({latestversion}) is available. Do you wish to install the latest version? (y/n) "))
+             Rsp0 = input(Colorate.Horizontal(Colors.purple_to_blue, f"A new version is available. Do you want to auto install the latest version? (y/n) "))
+             if Rsp0 in ["y", "Y", "n", "N"]:
+                 if Rsp0 in ["y", "Y"]:
+                     time.sleep(1)
+                     if __name__ == "__main__":
+                         Update()
+                         time.sleep(10)
+                         exit()
+                 elif Rsp0 in ["n", "N"]:
+                     print("Closing the program..")
+                     time.sleep(2)
+                     exit()
+
+
+def CheckForUpdate():
+ 
+ time.sleep(0.2)
+ pastebin = 'https://pastebin.com/raw/2mH6x1MU' # dont change. Checking for updates
+ time.sleep(0.2)
+ try:
+     response = requests.get(pastebin)
+     time.sleep(0.2)
+     response.raise_for_status()
+     time.sleep(0.2)
+     latestversion = response.text
+ except requests.RequestException as e:
+     print(f"Error: {e}")
+     time.sleep(15)
+     exit()
+ if latestversion != "1":
+         while True:
+             Rsp0 = input(Colorate.Horizontal(Colors.purple_to_blue, f"An Update is available. Do you want to auto install the update? (y/n) "))
              if Rsp0 in ["y", "Y", "n", "N"]:
                  if Rsp0 in ["y", "Y"]:
                      time.sleep(1)
@@ -106,6 +142,8 @@ def PrintTitle():
     """.format()                                             
     print(Colorate.Horizontal(Colors.purple_to_blue, GamingTextw, True)) 
 
+
+
 def UpdateLog():
             UpdateLogs = rf"""Update Log:
 
@@ -119,9 +157,16 @@ Injection Updates:
                                                      
             print(Colorate.Horizontal(Colors.purple_to_blue, UpdateLogs, True)) 
 
+
+
+
 PrintTitle()
     
 CheckVersion()
+
+time.sleep(2)
+
+CheckForUpdate()
 
 UpdateLog()
 
@@ -997,18 +1042,12 @@ class App(customtkinter.CTk):
         self.textbox.grid(row=0, column=1, padx=(10, 0), pady=(10, 0), sticky="nsew")
         self.textbox.insert("end", f"""Update Log:
                                                   
-Injector:
-                            
-[.]  Injector version: {Injector_Version}
-[.]  ToolLess Injection
-[.]  Faster Injection
-    
 UI:
 
 [.]  UI version: {UI_Version}
 [.]  Settings
 [.]  Status
-[.]  Custom UI
+[.]  Custom UI (Fixed)
 
 """)
         self.textbox.configure(state="disabled")
