@@ -24,7 +24,7 @@ from customtkinter import *
 p = psutil.Process(os.getpid())
 p.nice(psutil.HIGH_PRIORITY_CLASS)
 
-Injector_Version = 'V4.0'
+Injector_Version = 'V4.1'
 UI_Version = "V1"
 Current_Update = "1"
 
