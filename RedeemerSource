@@ -28,9 +28,9 @@ import threading
 p = psutil.Process(os.getpid())
 p.nice(psutil.HIGH_PRIORITY_CLASS)
 
-Injector_Version = 'V4.1'
+Injector_Version = 'V4.0'
 UI_Version = "V1"
-Current_Update = "1"
+Current_Update = "2"
 Current_Batch = "V1"
 
 
