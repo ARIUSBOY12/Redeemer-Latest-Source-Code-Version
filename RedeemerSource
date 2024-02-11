@@ -19,6 +19,10 @@ import os
 import json
 import psutil
 from customtkinter import *
+from winotify import Notification, audio
+import getpass
+from tkinter import filedialog
+import threading
 
 
 p = psutil.Process(os.getpid())
@@ -27,6 +31,8 @@ p.nice(psutil.HIGH_PRIORITY_CLASS)
 Injector_Version = 'V4.1'
 UI_Version = "V1"
 Current_Update = "1"
+Current_Batch = "V1"
+
 
 def CloseRBLX():
     UWP = Redeemer.YieldForProgram("Windows10Universal.exe")
@@ -41,29 +47,117 @@ def CloseRBLX():
         print("/\Roblox process has not been found")
         exit()
 
+####################################################################START OF UPDATE
 
 
-def Update():
+def Files():
+    if not os.path.exists("Opener.bat"):
+        UpdateBatch()
+        time.sleep(20)
+        exit()
+    elif not os.path.exists("Themes"):
+        print(Colors.red, f"Themes folder has not been found. Please reinstall Redeemer")
+        time.sleep(20)
+        exit()
+    elif not os.path.exists("Settings.py"):
+        try:
+            print("Settings.py has not been found. Creating a new one..")
+            time.sleep(2)
+            with open("Settings.py", "w") as f:
+                f.write('Notification = "off"\n') 
+                print(Colors.green, "Settings file created successfully.\nRerun the program")
+        except Exception as e:
+                print(Colors.red, f"Error while creating settings file: {e}")
+
+    elif not os.path.exists("KS"):
+        print(Colors.red, f"KS folder has not been found. Please reinstall Redeemer")
+        time.sleep(20)
+        exit()
+    elif not os.path.exists("Icon"):
+        print(Colors.red, f"Icon folder has not been found. Please reinstall Redeemer")
+        time.sleep(20)
+        exit()
+    elif not os.path.exists("Icon\\REDEEMER.png"):
+        print(Colors.red, f"REDEEMER.png has not been found in 'Icon' folder. Please reinstall Redeemer")   
+        time.sleep(20)
+        exit()
+
+
+
+def UpdateUI():
     try:
-        response = requests.get("https://raw.githubusercontent.com/ARIUSBOY12/Redeemer-Latest-Source-Code-Version/main/RedeemerSource")
-        if response.status_code == 200:
-            latest_source = response.text
+        ui = requests.get("https://raw.githubusercontent.com/ARIUSBOY12/Redeemer-Latest-Source-Code-Version/main/RedeemerSource")
+        if ui.status_code == 200:
+            latest_source = ui.text
             with open("ui.py", "w", encoding="utf-8") as file:
                 file.write(latest_source)
             print(Colors.green,"Installion was successfully!\nPlease Rerun the progra.")
             time.sleep(10)
         else:
-            print("Installion Failed.")
+            print(Colors.red, "Installion Failed.")
+    except Exception as e:
+        print(Colors.red, f"An error occurred: {e}")
+
+
+
+
+def UpdateBatch():
+    try:
+        opener_url = "https://raw.githubusercontent.com/ARIUSBOY12/Redeemer-Latest-Source-Code-Version/main/Opner.bat"
+        response = requests.get(opener_url)
+        if response.status_code == 200:
+            latest_source = response.text
+            with open("Opener.bat", "w", encoding="utf-8") as file:
+                file.write(latest_source)
+            print("Installation was successful!\nPlease rerun the program.")
+            time.sleep(10)
+        else:
+            print("Installation failed.")
     except Exception as e:
         print(f"An error occurred: {e}")
+        
+
+####################################################################START OF Checks
 
 
 
 def CheckVersion():
  time.sleep(0.2)
  pastebin = 'https://pastebin.com/raw/iunBLXdk' # dont change. its the latest version
+
  time.sleep(0.2)
 
+ try:
+     response = requests.get(pastebin)
+     time.sleep(0.2)
+     response.raise_for_status()
+     time.sleep(0.2)
+     latestversion = response.text
+ except requests.RequestException as e:
+     print(Colors.red, f"Error: {e}")
+     time.sleep(15)
+     exit()
+ if latestversion > Injector_Version:
+         while True:
+             time.sleep(0.2)
+             Rsp0 = input(Colorate.Horizontal(Colors.purple_to_blue, f"A new version is available. Do you want to auto install the latest version? (y/n) "))
+             if Rsp0 in ["y", "Y", "n", "N"]:
+                 if Rsp0 in ["y", "Y"]:
+                     time.sleep(1)
+                     if __name__ == "__main__":
+                         UpdateUI()
+                         time.sleep(10)
+                         exit()
+                 elif Rsp0 in ["n", "N"]:
+                     print("Closing the program..")
+                     time.sleep(2)
+                     exit()
+
+
+def CheckForUpdateForBatch():
+ time.sleep(0.2)
+ pastebin = 'https://pastebin.com/raw/3W5phzgy' # dont change. Checking Batch updates
+ time.sleep(0.2)
  try:
      response = requests.get(pastebin)
      time.sleep(0.2)
@@ -74,14 +168,14 @@ def CheckVersion():
      print(f"Error: {e}")
      time.sleep(15)
      exit()
- if latestversion > Injector_Version:
+ if latestversion > Current_Batch:
          while True:
-             Rsp0 = input(Colorate.Horizontal(Colors.purple_to_blue, f"A new version is available. Do you want to auto install the latest version? (y/n) "))
+             Rsp0 = input(Colorate.Horizontal(Colors.purple_to_blue, f"An batch update is available. Do you want to auto install the batch update? (y/n) "))
              if Rsp0 in ["y", "Y", "n", "N"]:
                  if Rsp0 in ["y", "Y"]:
                      time.sleep(1)
                      if __name__ == "__main__":
-                         Update()
+                         UpdateBatch()
                          time.sleep(10)
                          exit()
                  elif Rsp0 in ["n", "N"]:
@@ -90,8 +184,8 @@ def CheckVersion():
                      exit()
 
 
+
 def CheckForUpdate():
- 
  time.sleep(0.2)
  pastebin = 'https://pastebin.com/raw/2mH6x1MU' # dont change. Checking for updates
  time.sleep(0.2)
@@ -105,14 +199,14 @@ def CheckForUpdate():
      print(f"Error: {e}")
      time.sleep(15)
      exit()
- if latestversion != "1":
+ if latestversion != Current_Update:
          while True:
              Rsp0 = input(Colorate.Horizontal(Colors.purple_to_blue, f"An Update is available. Do you want to auto install the update? (y/n) "))
              if Rsp0 in ["y", "Y", "n", "N"]:
                  if Rsp0 in ["y", "Y"]:
                      time.sleep(1)
                      if __name__ == "__main__":
-                         Update()
+                         UpdateUI()
                          time.sleep(10)
                          exit()
                  elif Rsp0 in ["n", "N"]:
@@ -120,6 +214,8 @@ def CheckForUpdate():
                      time.sleep(2)
                      exit()
 
+
+####################################################################END OF Checks
 
 os.system("cls" if os.name == "nt" else "clear")
 
@@ -157,18 +253,25 @@ Injection Updates:
                                                      
             print(Colorate.Horizontal(Colors.purple_to_blue, UpdateLogs, True)) 
 
-
+username = getpass.getuser()
+path = f"C:\\Users\\{username}\\Desktop\\V4 UI\\Icon\\REDEEMER.png"
 
 
 PrintTitle()
-    
+
+Files()
+
+time.sleep(0.5)
+
 CheckVersion()
 
-time.sleep(2)
-
-CheckForUpdate()
+time.sleep(1)
 
 UpdateLog()
+
+time.sleep(1)
+
+CheckForUpdate()
 
 print("")
 print(Colorate.Horizontal(Colors.purple_to_blue, "Made by Xavier✞ | NIKYISME | Hisako | Darian | Bobly | Cipher | Klay", 1))
@@ -257,7 +360,7 @@ class Redeemer:
             return_multiple=xreturn_multiple,
         )
         except Exception as e:
-            print(f"WinApi Error: {e}")
+            print(Colors.red, f"WinApi Error: {e}")
             pass
 
 
@@ -591,7 +694,7 @@ def ReadRobloxString(ExpectedAddress: int) -> str:
                 return Redeemer.Pymem.read_string(Redeemer.DRP(ExpectedAddress), StringCount)
             return Redeemer.Pymem.read_string(ExpectedAddress, StringCount)
         except TypeError as e:
-            print(f"TypeError: {e} \n" + "Rsp3")
+            print(Colors.red, f"TypeError: {e} \n" + "Rsp3")
             time.sleep(10)
             exit() 
 
@@ -609,13 +712,13 @@ def setParent(Instance, Parent, parentOffset, childrenOffset):
     childrenEnd = Redeemer.Pymem.read_longlong(ptr + 8)
 
     if childrenStart == 0 or childrenEnd == 0 or childrenEnd <= childrenStart:
-        print("\033[91mError: Invalid children range. Line: Rsp4\033[0m")
+        print(Colors.red, "\033[91mError: Invalid children range. Line: Rsp4\033[0m")
         time.sleep(10)
         exit() 
 
     length = childrenEnd - childrenStart
     if length < 0:
-        print("\033[91mError: Negative length for children array. Line: Rsp5\033[0m")
+        print(Colors.red, "\033[91mError: Negative length for children array. Line: Rsp5\033[0m")
         time.sleep(10)
         exit() 
 
@@ -640,14 +743,14 @@ def inject():
         "506C6179657273??????????????????07000000000000000F", True
     )
     if not results:
-        print("\033[91mUnknown error please rerun the program! Line: Rsp6\033[0m")
+        print(Colors.red, "\033[91mUnknown error please rerun the program! Line: Rsp6\033[0m")
         time.sleep(10)
         exit() 
 
     for rn in results:
         result = rn
         if not result:
-            print("\033[91mError: please rerun the program! Line: Rsp7\033[0m")
+            print(Colors.red, "\033[91mError: please rerun the program! Line: Rsp7\033[0m")
             time.sleep(10)
             exit()
         bres = Redeemer.d2h(result)
@@ -755,7 +858,7 @@ def inject():
 
                 return ExpectedAddress
         except TypeError as e:
-            print(f"TypeError: {e} \n" + "Line: Rsp10")
+            print(Colors.red, f"TypeError: {e} \n" + "Line: Rsp10")
             time.sleep(10)
             exit()
 
@@ -852,7 +955,7 @@ def inject():
     workspace = toInstance(FindFirstChildOfClass(dataModel, "Workspace"))
     
     if workspace is None:
-        print("\033[91mError: 'Workspace' not found. Line: Rsp12\033[0m")
+        print(Colors.red, "\033[91mError: 'Workspace' not found. Line: Rsp12\033[0m")
         time.sleep(10)
         exit()
     else:
@@ -876,17 +979,29 @@ def inject():
             break 
     
     if not character_found:
-        print("\033[91mError: 'Character' not found in Workspace. Line: Rsp13\033[0m")
+        print(Colors.red, "\033[91mError: 'Character' not found in Workspace. Line: Rsp13\033[0m")
         time.sleep(10)
         exit()
         
     animateScript = character.findFirstChild("Animate")
     if animateScript is None:
-        print("\033[91mError: 'Animate' LocalScript not found in character. Line: Rsp14\033[0m")
+        print(Colors.red, "\033[91mError: 'Animate' LocalScript not found in character. Line: Rsp14\033[0m")
         time.sleep(10)
         exit()
-        
-    print("/\Attaching process to: Animate")
+    with open("Settings.py", "r") as f:
+        content = f.read()
+        if 'Notification = "on"' in content:
+            toast1 = Notification(app_id=f"Redeemer {Injector_Version}",
+                         title="Injected Successfully",
+                         msg=f"/\Attaching process to: Animate",
+                         duration="short",
+                         icon=f"{path}")
+   
+            toast1.set_audio(audio.Mail, loop=False)
+            toast1.show()
+        elif 'Notification = "off"' in content:
+            print("/\Attaching process to: Animate")
+    
     targetScript = toInstance(animateScript)
     injectScript = None
     results = Redeemer.AOBSCANALL("496E6A656374????????????????????06", True)
@@ -917,7 +1032,19 @@ def inject():
         if valid:
             break
     injectScript = toInstance(injectScript)
-    print("/\Successfully attached :", Redeemer.d2h(injectScript.Self))
+    with open("Settings.py", "r") as f:
+        content = f.read()
+        if 'Notification = "on"' in content:
+            toast2 = Notification(app_id=f"Redeemer {Injector_Version}",
+                         title="Injected Successfully",
+                         msg=f"Successfully Injected into '{Redeemer.d2h(injectScript.Self)}'",
+                         duration="short",
+                         icon=f"{path}")
+   
+            toast2.set_audio(audio.Mail, loop=False)
+            toast2.show()
+        elif 'Notification = "off"' in content:
+            print("/\Successfully attached :", Redeemer.d2h(injectScript.Self))
     b = Redeemer.Pymem.read_bytes(injectScript.Self + 0x100, 0x150)
     Redeemer.Pymem.write_bytes(targetScript.Self + 0x100, b, len(b))
     playerScripts = toInstance(localPlayer.FindFirstClass("PlayerScripts"))
@@ -933,43 +1060,40 @@ def inject():
 
 
 
+
+Default_Theme = "Themes\\redeemer.json"
+
 def read_theme_from_file():
     try:
-        with open("Theme.py", "r") as f:
+        with open("Themes\\Selected Theme.py", "r") as f:
             theme_dict = json.load(f)
             theme_path = theme_dict
-            if theme_path and os.path.exists(theme_path) and theme_path.endswith('.json'):
+            if theme_path and os.path.exists(theme_path) and theme_path.endswith('.json') and os.path.getsize(theme_path) < 8 * 1024:
                 return theme_dict
             else:
-                print("Error: Theme path does not exist or is not a valid JSON file.\nApplying Default Theme..")
+                print(Colors.red, "Error: Invalid theme file. Applying default theme..")
                 return None
-    except FileNotFoundError:
-        print("Error: Theme.py file not found.")
+    except FileNotFoundError as e:
+        print(Colors.red, f"Error: {e}. Applying default theme..")
         return None
     except json.JSONDecodeError as e:
-        print(f"Error decoding JSON: {e}")
+        print(Colors.red, f"Error decoding JSON: {e}. Applying default theme..")
         return None
     except Exception as e:
-        print(f"Error: {e}")
+        print(Colors.red, f"Error: {e}. Applying default theme..")
         return None
 
-theme_dict = read_theme_from_file()
 
+theme_dict = read_theme_from_file()
 if theme_dict:
     customtkinter.set_default_color_theme(theme_dict)
 else:
-    customtkinter.set_default_color_theme("redeemer.json") # Default theme path
-
+    customtkinter.set_default_color_theme(Default_Theme)
 
 
 class App(customtkinter.CTk):
-    def __init__(self):
-        super().__init__()
 
-    def open_discord(self):
-        webbrowser.open('https://discord.gg/redeemerog')
-
-    def CheckStatus(self):
+    def check_status(self):
         time.sleep(0.2)
         pastebin = 'https://pastebin.com/raw/dhmuBXGq'
         time.sleep(0.2)
@@ -980,7 +1104,7 @@ class App(customtkinter.CTk):
             status = response.text
             time.sleep(0.2)
         except requests.RequestException as e:
-            print(f"Error: {e}")
+            print(Colors.red, f"Error: {e}")
             return "Failed to fetch status"
         
         if status == "P":
@@ -990,35 +1114,19 @@ class App(customtkinter.CTk):
         else:
             return "Unknown"
 
-    def lmao(self):
-        if inject():
-            print(Colorate.Horizontal(Colors.purple_to_blue, "[.] Hooked have fun :)", 1))
-            self.main_button_1.configure(state="disabled")
-            pass
-        else:
-            print("\033[35mError during injection! Line: Rsp17\033[0m")
-            time.sleep(10)
-            exit()  
-
     def __init__(self):
         super().__init__()
-        
-        self.title(f"Redeemer {Injector_Version}")
+        self.title("Redeemer")
         self.geometry(f"{525}x{314}")
         self.resizable(False, False)  
         self.configure(background="white")
-        try:
-            self.iconphoto(True, PhotoImage(file="REDEEMER.png"))
-        except Exception as e:
-            print(f"Error: {e}")
-            return
+        self.create_widgets()
 
-        # configure grid layout (4x4)
+    def create_widgets(self):
         self.grid_columnconfigure(1, weight=1)
         self.grid_columnconfigure((2, 3), weight=0)
         self.grid_rowconfigure((0, 1, 2), weight=1)
 
-        # create sidebar frame with widgets
         self.sidebar_frame = customtkinter.CTkFrame(self, width=140, corner_radius=0)
         self.sidebar_frame.grid(row=0, column=0, rowspan=4, sticky="nsew")
         self.sidebar_frame.grid_rowconfigure(4, weight=1)
@@ -1029,10 +1137,10 @@ class App(customtkinter.CTk):
         self.sidebar_button_1 = customtkinter.CTkButton(self.sidebar_frame, text="Open Discord", command=self.open_discord)
         self.sidebar_button_1.grid(row=2, column=0, padx=10, pady=5)
 
-        self.appearance_mode_label = customtkinter.CTkLabel(self.sidebar_frame, text=f"Status: {self.CheckStatus()}", anchor="w")
+        self.appearance_mode_label = customtkinter.CTkLabel(self.sidebar_frame, text=f"Status: {self.check_status()}.", anchor="w")
         self.appearance_mode_label.grid(row=3, column=0, padx=10, pady=(10, 0))
 
-        self.main_button_1 = customtkinter.CTkButton(master=self, text="Inject", border_width=2, text_color=("gray10", "#DCE4EE"), command=self.lmao)
+        self.main_button_1 = customtkinter.CTkButton(master=self, text="Inject", border_width=2, text_color=("gray10", "#DCE4EE"), command=self.inject)
         self.main_button_1.grid(row=3, column=1, padx=(10, 10), pady=(10, 10), sticky="nsew")
 
         self.sidebar_button_2 = customtkinter.CTkButton(self.sidebar_frame, text="Settings", command=self.open_settings)
@@ -1043,8 +1151,7 @@ class App(customtkinter.CTk):
         self.textbox.insert("end", f"""Update Log:
                                                   
 UI:
-
-[.]  UI version: {UI_Version}
+[.]  UI Version: {UI_Version}
 [.]  Settings
 [.]  Status
 [.]  Custom UI (Fixed)
@@ -1052,11 +1159,28 @@ UI:
 """)
         self.textbox.configure(state="disabled")
 
+    def open_discord(self):
+        webbrowser.open('https://discord.gg/redeemerog')
+
+    def inject(self):
+        def inject_thread():
+            if inject():
+                print(Colorate.Horizontal(Colors.purple_to_blue, "[.] Hooked have fun :)", 1))
+                self.main_button_1.configure(state="disabled")
+            else:
+                print(Colors.red, "\033[35mError during injection! Line: Rsp17\033[0m")
+                time.sleep(10)
+                exit()  
+
+        threading.Thread(target=inject_thread).start()
 
     def open_settings(self):
         settings_window = SettingsWindow()
         settings_window.geometry(f"{525}x{314}")
+    
 
+
+        
 class SettingsWindow(tk.Toplevel):
     def __init__(self):
         super().__init__()
@@ -1064,22 +1188,44 @@ class SettingsWindow(tk.Toplevel):
         self.configure(background="black")
         self.geometry(f"{525}x{314}")
         self.resizable(False, False)
+        self.create_widgets()
 
+    def create_widgets(self):
         self.button = customtkinter.CTkButton(self, text="Custom UI", command=self.open_custom_ui)
         self.button.grid(row=0, column=0, padx=10, pady=10)
+
+        self.notification_label = customtkinter.CTkLabel(self, text="Allow Notifications", font=customtkinter.CTkFont(size=11, weight="bold"), anchor="w")
+        self.notification_label.grid(row=1, column=0, padx=10, pady=(10, 0), sticky="w")
+
+        self.notification_var = customtkinter.StringVar()
+        self.notification_checkbox = customtkinter.CTkCheckBox(self, text="", variable=self.notification_var, onvalue="on", offvalue="off")
+        self.notification_checkbox.grid(row=1, column=1, padx=10, pady=(10, 0), sticky="w")
+
+        with open("Settings.py", "r") as f:
+            settings = f.read()
+            if 'Notification = "on"' in settings:
+                self.notification_var.set("on")
+                self.notification_checkbox.select()
+            elif 'Notification = "off"' in settings:
+                self.notification_var.set("off")
+                self.notification_checkbox.deselect()
+
+        self.button = customtkinter.CTkButton(self, text="Save Notifications", command=self.save_notifications)
+        self.button.grid(row=2, column=0, padx=10, pady=5)
 
     def open_custom_ui(self):
         custom_ui_window = CustomUIWindow(self)
         custom_ui_window.geometry(f"{525}x{314}")
         self.resizable(False, False)
 
-class CustomUIWindow(tk.Toplevel):
-    def change_background(self, color):
-        self.app_instance.configure(bg=color) 
-
-def update_theme_file(path):
-    with open("Theme.py", "w") as f:
-        f.write(f'"{path}"')
+    def save_notifications(self):
+        try:
+            notification_value = self.notification_var.get()
+            with open("Settings.py", "w") as f:
+                f.write(f'Notification = "{notification_value}"')
+                print(Colors.green, f"Succesfully Saved as '{notification_value}'")
+        except Exception as e:
+            print(Colors.red, f"Error while saving: {e}")
 
 class CustomUIWindow(tk.Toplevel):
     def __init__(self, parent):
@@ -1087,17 +1233,17 @@ class CustomUIWindow(tk.Toplevel):
         self.title("Custom UI")
         self.geometry(f"{525}x{314}")
         self.resizable(False, False)
-        self.configure(background="black")        
+        self.configure(background="black")       
         self.app_instance = parent
 
-        self.text_box = tk.Text(self, width=40, height=5.)
-        self.text_box.grid(row=0, column=0, padx=10, pady=5, sticky="ew")
+        self.text_box = customtkinter.CTkTextbox(self, width=250, height=50)
+        self.text_box.place(relx=0.5, rely=0.2, anchor="center")
 
-        browse_button = tk.Button(self, text="Browse", command=self.browse_file)
-        browse_button.grid(row=1, column=0, padx=10, pady=5, sticky="ew")
+        browse_button = customtkinter.CTkButton(self, text="Browse", command=self.browse_file)
+        browse_button.place(relx=0.5, rely=0.8, anchor="center")
 
-        update_button = tk.Button(self, text="Update Theme", command=self.on_button_click)
-        update_button.grid(row=2, column=0, padx=10, pady=5, sticky="ew")
+        update_button = customtkinter.CTkButton(self, text="Update Theme", command=self.on_button_click)
+        update_button.place(relx=0.5, rely=0.9, anchor="center")
 
     def browse_file(self):
         file_path = filedialog.askopenfilename(filetypes=[("JSON files", "*.json")])
@@ -1110,17 +1256,17 @@ class CustomUIWindow(tk.Toplevel):
 
     def update_theme_file(self, path):
         try:
-            with open("Theme.py", "w") as f:
+            with open("Themes\\Selected Theme.py", "w") as f:
                 f.write(f'"{path}"')
         except Exception as e:
-            print(f"Error updating theme file: {e}")
+            print(Colors.red, f"Error while updating theme File: {e}")
 
     def validate_json(self, path):
         if not os.path.exists(path):
-            print("Error: The specified file path does not exist.")
+            print(Colors.red, "Error: The specified file path does not exist.")            
             return False
         elif not path.endswith(".json"):
-            print("Error: The file is not a JSON file.")
+            print(Colors.red, "Error: The file is not a JSON file.")
             return False
         else:
             try:
@@ -1128,24 +1274,19 @@ class CustomUIWindow(tk.Toplevel):
                     json.load(f)
                 return True
             except json.JSONDecodeError:
-                print("Error: Invalid JSON format.")
+                print(Colors.red, "Error: Invalid JSON format.")
                 return False
-
+            
     def on_button_click(self):
         path = self.text_box.get("1.0", "end").strip()
         if self.validate_json(path):
             self.update_theme_file(path)
-            print(Colors.green, "Theme file updated successfully!")
-            print(Colors.green, "Please close the program and open it again to apply the new theme.")
+            print(Colors.green,"Theme file updated successfully!")
+            print(Colors.green,"Please close the program and open it again to apply the new theme.")
         else:
-            print("Theme file was not updated.")
-
-
+            print(Colors.red, "Theme file was not updated.")
 
 if __name__ == "__main__":
     app = App()
     app.mainloop()
-
-
-
 
