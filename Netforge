@@ -448,20 +448,21 @@ class App(customtkinter.CTk):
         else:
             OutPutWrite("Netforge.ico not found", "red")
 
-            
+
         def Update():
-                            try:
-                                    ui = requests.get("https://raw.githubusercontent.com/ARIUSBOY12/Redeemer-Latest-Source-Code-Version/main/RedeemerSource")
-                                    if ui.status_code == 200:
-                                        latest_source = ui.text
-                                        with open("ui.py", "w", encoding="utf-8") as file:
-                                            file.write(latest_source)
-                                        OutPutWrite(Colors.green,"Installion was successfully!\nPlease Rerun the program", "#32CD32")
-                                        time.sleep(10)
-                                    else:
-                                        OutPutWrite(f"Installion Failed. Status code: {ui.status_code}", "red")
-                            except Exception as e:
-                                    OutPutWrite(f"An error occurred: {e}", "red")
+                try:
+                    ui = requests.get("https://raw.githubusercontent.com/ARIUSBOY12/Redeemer-Latest-Source-Code-Version/main/Netforge")
+                    if ui.status_code == 200:
+                        latest_source = ui.text
+                        with open("Server.py", "w", encoding="utf-8") as file:
+                            file.write(latest_source)
+                        OutPutWrite(Colors.green,"Installion was successfully!\nPlease Rerun the program", "#32CD32")
+                        time.sleep(10)
+                    else:
+                        OutPutWrite(f"Installion Failed. Status code: {ui.status_code}", "red")
+                except Exception as e:
+                        OutPutWrite(f"An error occurred: {e}", "red")
+
         def CheckVersion():
          time.sleep(0.2)
          LatestVersion = 'https://pastebin.com/raw/iunBLXdk'
