@@ -1,0 +1,1123 @@
+import tkinter as tk
+import customtkinter
+import webbrowser
+import subprocess
+import os
+import json
+import threading
+import socket
+import getpass
+import logging
+
+import pathlib
+import requests
+import time
+import random
+import string
+import pyautogui
+import win32security
+import ctypes
+import psutil
+
+from tkinter import filedialog
+from pytube import YouTube
+from winotify import Notification, audio
+from datetime import datetime
+
+
+import re
+import ast
+import pymem
+import tkinter.messagebox
+
+from PIL import Image, ImageTk
+from multiprocessing import Process
+from customtkinter import *
+
+from tkinter import ttk
+from queue import Queue
+from threading import Thread
+from tkinter import scrolledtext
+from tkinter import messagebox
+from PIL import Image, ImageTk
+from pystyle import Colors, Colorate
+from tkinter import *
+
+
+
+
+Submitted = False
+CurrentVersion = 'V2.0'
+
+User = getpass.getuser()
+
+def WinMsg(AppId, title, msg):
+    toast = Notification(app_id=AppId,
+                         title=title,
+                         msg= msg,
+                         duration="long",
+                         icon=f"C:\\Users\\{User}\\Desktop\\NetForge\\Visual Media\\Images\\Netforge.ico")
+    
+    if os.path.exists("Settings\\Settings.py"):
+            with open("Settings\\Settings.py", "r") as f:
+                settings = f.read()
+                if 'Notification = "on"' in settings:
+                    if 'Sound = "on"' in settings:
+                        toast.set_audio(audio.Default, loop=False)
+                        toast.show()
+                    else:
+                        toast.show()
+                else:
+                    pass
+    
+
+
+
+
+def WriteError(error_type, error_msg):
+    try:
+        folder = "Other\\Errors"
+        if not os.path.exists(folder):
+            os.makedirs(folder)
+
+        Time = datetime.now().strftime('%I-%M-%S %p')
+        Year = datetime.now().strftime('%Y-%m-%d')
+        NewTextFile = os.path.join(folder, f"{error_type}__[{Year}]--[{Time}].txt")
+
+        with open(NewTextFile, "w") as error_file:
+            error_file.write(f"Error Type: {error_type}\n")
+            error_file.write(f"Error Message: {error_msg}\n")
+            error_file.write(f"Time: {Year} | {datetime.now().strftime('%I:%M:%S %p')}")
+
+        return True, None
+
+    except FileNotFoundError as e:
+        logging.error("Folder not found while writing error: %s", folder)
+        return False, e
+
+    except PermissionError as e:
+        logging.error("Permission denied while writing error: %s", folder)
+        return False, e
+    
+    except NameError as e:
+        print(f"ERROR: {e}")
+        return False, e
+
+    except Exception as e:
+        logging.exception("An error occurred while writing error:")
+        return False, e
+
+
+
+
+
+
+
+
+
+
+
+class VidInstall(tk.Toplevel):# Video installer
+    def __init__(self):
+        super().__init__()
+        self.title("Video Installer")
+        self.configure(background="black")
+        self.geometry(f"{525}x{314}")
+        self.resizable(False, False)
+
+        self.appearance_mode_label = customtkinter.CTkLabel(self, text=f"Paste in the Video's URL")
+        self.appearance_mode_label.place(relx=0.5, rely=0.1, anchor="n")
+
+        self.Twitch = customtkinter.StringVar()
+        self.TwitchBox = customtkinter.CTkCheckBox(self, text="Twitch", variable=self.Twitch, onvalue="on", offvalue="off")
+        self.TwitchBox.grid(row=0, column=2, padx=10, pady=(10, 0), sticky="w")
+        self.TwitchBox.bind("<Button-1>", self.TwitchInst)
+
+        self.YT = customtkinter.StringVar()
+        self.YouTube = customtkinter.CTkCheckBox(self, text="YouTube", variable=self.YT, onvalue="on", offvalue="off")
+        self.YouTube.grid(row=0, column=1, padx=10, pady=(10, 0), sticky="w")
+        self.YouTube.bind("<Button-1>", self.YouTubeInst)
+
+        self.URL = customtkinter.CTkTextbox(self, width=260)
+        self.URL.place(relx=0.5, rely=0.5, anchor="center")
+        self.URL.configure(state="normal")
+        
+
+        self.Button = customtkinter.CTkButton(self, text="Download", command=lambda: self.ChoosenOne(self.URL.get("1.0", "end-1c")))
+        self.Button.place(relx=0.5, rely=1, anchor="s")
+
+        self.grab_set()
+        self.wait_window()
+
+################################
+
+    def OutPutWrite(self, msg="ERROR", color="red"):
+            self.URL.configure(state="normal")
+            self.URL.tag_config(color, foreground=color)
+            self.URL.insert(tk.END, msg, color)
+            self.URL.insert(tk.END, "\n")
+            self.URL.see(tk.END)
+            self.URL.configure(state="disabled")
+            
+            """
+            LimeGreen = "#32CD32"  
+            """
+
+
+    def ClearOutPut(self):
+            self.URL.configure(state="normal")
+            self.URL.delete("1.0", tk.END)
+            self.URL.configure(state="disabled")
+
+
+    def RunFunc(self, func, *args, **kwargs):
+        thread = threading.Thread(target=func, args=args, kwargs=kwargs)
+        thread.daemon = True
+        thread.start()
+                
+################################
+
+    def TwitchInst(self, event=None):
+        if self.YT.get() == "on" and self.Twitch.get() == "off":
+            self.YouTube.deselect()
+
+        elif self.YT.get() == "on" and self.Twitch.get() == "on":
+            self.YouTube.deselect()
+
+        elif self.YT.get() == "off" and self.Twitch.get() == "off":
+            self.TwitchBox.select()
+
+
+    def YouTubeInst(self, event=None):
+        self.YouTube.select()
+        if self.YT.get() == "off" and self.Twitch.get() == "on":
+            self.TwitchBox.deselect()
+
+        elif self.YT.get() == "on" and self.Twitch.get() == "on":
+            self.TwitchBox.deselect()
+
+        elif self.YT.get() == "off" and self.Twitch.get() == "off":
+            self.YouTube.select()
+
+
+    def ChoosenOne(self, url=None):
+        self.ClearOutPut()
+        if not url == None: 
+            self.ClearOutPut()
+            
+
+            if self.YT.get() == "on" and not url == "" and not url == " ":
+                self.Button.configure(text="Downloading...")
+                self.InstallYouTubeVid(url)
+
+            elif self.Twitch.get() == "on" and not url == "" and not url == " ":
+                self.Button.configure(text="Downloading...")
+                self.InstallTwitch(url)
+
+            else:
+                self.OutPutWrite("Press YouTube or Twitch and paste in the video's URL and press Download.", "yellow")
+                self.URL.configure(state="normal")
+
+################################
+
+    def InstallYouTubeVid(self, url):
+            StoreVid = "Videos\\YouTube Videos"
+            if not os.path.exists(StoreVid):
+                os.makedirs(StoreVid)
+
+            self.RunFunc(self.YouTubeDownloader, url, StoreVid)
+
+
+    def InstallTwitch(self, url):
+            StoreVid = "Videos\\Twitch Videos"
+            if not os.path.exists(StoreVid):
+                os.makedirs(StoreVid)
+                
+            self.RunFunc(self.TwitchDownload, url, StoreVid)
+
+
+    def YouTubeDownloader(self, url, StoreVid):
+        try:
+            self.OutPutWrite("Fetching video information...", "white")
+            yt = YouTube(url)
+            self.Info(yt)
+        
+            self.OutPutWrite("\nVideo information fetched Successfully", "#32CD32")
+
+            self.OutPutWrite("Downloading...", "white")
+            if yt.age_restricted:
+                try:
+                    self.OutPutWrite("Age-restricted video. Attempting to bypass age restriction...", "yellow")
+                    yt = yt.age_restricted.decorate()
+                    self.OutPutWrite("Age restriction bypassed successfully!", "green")
+                except Exception as e:
+                    EMsg = f"Error: {e}"
+                    success, error = WriteError("Exception", EMsg)
+                    if not success:
+                        self.OutPutWrite(f'Error: Failed to make a txt file in "Errors": {error}.', "red")
+
+                    self.OutPutWrite(f'Error while trying to bypass a age restricted video: {e}.', "red")
+
+
+
+            resolution = self.HighResolution(yt)
+            if resolution:
+                VideoStream = yt.streams.filter(res=resolution, progressive=True).first()
+                filepath = os.path.join(StoreVid, VideoStream.default_filename)
+                VideoStream.download(StoreVid)
+                self.Details(filepath, yt.title, resolution)
+                self.OutPutWrite("\nVideo Downloaded Successfully!", "#32CD32")
+            else:
+                EMsg = f"Error: No suitable video stream found."
+                success, error = WriteError("ValueError", EMsg)
+                if not success:
+                    self.OutPutWrite(f'Error: Failed to make a txt file in "Errors": {error}.', "red")
+
+                self.OutPutWrite("ValueError: No suitable video stream found.", "red")
+
+        except Exception as e:  
+            EMsg = f"Error: {e}"
+            success, error = WriteError("Exception", EMsg)
+            if not success:
+                self.OutPutWrite(f'Error: Failed to make a txt file in "Errors": {error}.', "red")
+            self.OutPutWrite(f"\nError while downloading video: {e}", "red")
+            
+            
+
+
+
+    def Info(self, yt=None):
+        self.OutPutWrite(f"\nTitle: {yt.title}", "white")
+        self.OutPutWrite(f"Description: {yt.description}", "white")
+        self.OutPutWrite(f"Owner: {yt.author}", "white")
+        self.OutPutWrite(f"Views: {yt.views}", "white")
+        self.OutPutWrite(f"Length: {yt.length} seconds", "white")
+        self.OutPutWrite(f"Published Date: {yt.publish_date}", "white")
+        self.OutPutWrite(f"Video ID: {yt.video_id}", "white")
+        self.OutPutWrite(f"Thumbnail URL: {yt.thumbnail_url}", "white")
+        self.OutPutWrite(f"Rating: {yt.rating}", "white")
+        
+
+
+    def HighResolution(self, yt=None):
+        resolutions = ["1080p", "720p", "480p", "360p", "240p", "144p"]
+        for res in resolutions:
+            if yt.streams.filter(res=res, progressive=True).first():
+                return res
+        return None
+
+    def Convert(self, bytes=None):
+        if bytes < 1024:
+            return f"{bytes} B"
+        elif bytes < 1024 * 1024:
+            return f"{bytes / 1024:.2f} KB"
+        elif bytes < 1024 * 1024 * 1024:
+            return f"{bytes / (1024 * 1024):.2f} MB"
+        else:
+            return f"{bytes / (1024 * 1024 * 1024):.2f} GB"
+
+    def Details(self, filepath, title, resolution):
+        self.OutPutWrite(f"\nTitle: {title}", "white")
+        self.OutPutWrite(f"Resolution: {resolution}", "white")
+        self.OutPutWrite(f"File Path: {filepath}", "white")
+        file_size = os.path.getsize(filepath)
+        self.OutPutWrite(f"File Size: {self.Convert(file_size)}", "white")
+
+
+
+
+
+
+    def TwitchDownload(self, url, StoreVid):
+        try:
+            if os.path.exists("Videos\\Twitch Videos\\video.mp4"):
+                self.OutPutWrite('Error: Change or remove the file named "Twitch Video.mp4" in "Videos\\Twitch Videos".', "red")
+                
+            else:
+                self.OutPutWrite("Downloading Twitch video...", "white")
+                self.OutPutWrite("Do not change the file name while it's downloading!", "yellow")
+                result = subprocess.run(["streamlink", "--hls-segment-threads", "4", url, "best", "-o", os.path.join(StoreVid, "Twitch Video.mp4")], capture_output=True, text=True)
+                if result.returncode == 0:
+                    self.OutPutWrite(result.stdout, "white")
+                    self.OutPutWrite("Twitch video downloaded successfully!", "#32CD32")
+                
+                else:   
+                    self.OutPutWrite(result.stderr, "red")
+                    self.OutPutWrite("Failed to download Twitch video.", "red")
+                
+    
+        except Exception as e:
+                EMsg = f"Error: {e}"
+                success, error = WriteError("Exception", EMsg)
+                if not success:
+                    self.OutPutWrite(f'Error: Failed to make a txt file in "Errors": {error}.', "red")
+                
+                self.OutPutWrite(f"\nError downloading Twitch video: {e}", "red")
+
+
+
+def VideoRun():
+    VidInstall()
+
+
+
+
+
+class App(customtkinter.CTk):
+    def __init__(self):
+        super().__init__()
+        
+
+        def ReadTheme():
+            try:
+                with open("Settings\\Selected Theme.py", "r") as f:
+                    Theme = json.load(f)
+                    Path = Theme
+                    if Path and os.path.exists(Theme) and Path.endswith('.json') and os.path.getsize(Path) < 8 * 1024 and os.path.getsize(Path) > 6 * 1024:
+                        return Theme
+                    else:
+                        EMsg = "Error: Invalid theme file."
+                        success, error = WriteError("Invalid Theme", EMsg)
+                        if not success:
+                            print(f'Error: Failed to make a txt file in "Errors": {error}.')
+                        return None
+
+            except FileNotFoundError as e:
+                EMsg = f"Error: {e}. "
+                success, error = WriteError("FileNotFoundError", EMsg)
+                if not success:
+                    pass
+                return None
+            
+            except json.JSONDecodeError as e:
+                EMsg = f"Error decoding JSON: {e}."
+                success, error = WriteError("JSONDecodeError", EMsg)
+                if not success:
+                    pass
+                return None
+            
+            except Exception as e:
+                EMsg = f"Error: {e}."
+                success, error = WriteError("Exception", EMsg)
+                if not success:
+                    pass
+                return None
+
+
+        if os.path.exists("Visual Media\\Themes\\Default.json"):
+            NewTheme = ReadTheme()
+            if NewTheme:
+                customtkinter.set_default_color_theme(NewTheme)
+            else:
+                customtkinter.set_default_color_theme("Visual Media\\Themes\\Default.json")
+
+       
+
+        self.title("NetForge")
+        self.geometry(f"{525}x{314}")
+        self.resizable(False, False)  
+        self.configure(background="black")
+
+        self.OutPut = customtkinter.CTkTextbox(self, width=250)
+        self.OutPut.grid(row=1, column=1, padx=(10, 10), pady=(10, 10), sticky="nsew")
+        self.OutPut.configure(state="disabled")
+
+        self.ClearOutPutButton = customtkinter.CTkButton(master=self, text="Clear Output", border_width=2, command=lambda: RunFunc(ClearOutPut))
+        self.ClearOutPutButton.grid(row=3, column=1, padx=(10, 10), pady=(10, 10), sticky="nsew")
+
+        def OutPutWrite(msg, color="red"):
+            self.OutPut.configure(state="normal")
+            self.OutPut.tag_config(color, foreground=color)
+            self.OutPut.insert(tk.END, msg, color)
+            self.OutPut.insert(tk.END, "\n")
+            self.OutPut.see(tk.END)
+            self.OutPut.configure(state="disabled")
+            
+            """
+            LimeGreen = "#32CD32"  
+            
+            """
+
+        def ClearOutPut():
+            self.OutPut.configure(state="normal")
+            self.OutPut.delete("1.0", tk.END)
+            self.OutPut.configure(state="disabled")
+
+        if os.path.exists("Visual Media\\Images\\Netforge.ico"):
+            self.iconbitmap("Visual Media\\Images\\Netforge.ico")
+        else:
+            OutPutWrite("Netforge.ico not found", "red")
+
+            
+        def Update():
+                            try:
+                                    ui = requests.get("https://raw.githubusercontent.com/ARIUSBOY12/Redeemer-Latest-Source-Code-Version/main/RedeemerSource")
+                                    if ui.status_code == 200:
+                                        latest_source = ui.text
+                                        with open("ui.py", "w", encoding="utf-8") as file:
+                                            file.write(latest_source)
+                                        OutPutWrite(Colors.green,"Installion was successfully!\nPlease Rerun the program", "#32CD32")
+                                        time.sleep(10)
+                                    else:
+                                        OutPutWrite(f"Installion Failed. Status code: {ui.status_code}", "red")
+                            except Exception as e:
+                                    OutPutWrite(f"An error occurred: {e}", "red")
+        def CheckVersion():
+         time.sleep(0.2)
+         LatestVersion = 'https://pastebin.com/raw/iunBLXdk'
+
+         try:
+             response = requests.get(LatestVersion)
+             response.raise_for_status()
+             latestversion = response.text
+
+         except requests.RequestException as e:
+                EMsg = f"Error: {e}"
+                success, error = WriteError("RequestException", EMsg)
+                if not success:
+                    WriteError(f'Error: Failed to make a txt file in "Errors": {error}. Error: RequestException: {e}')
+                else:
+                    OutPutWrite(f'Error: {e}', "red")
+
+
+
+         if latestversion > CurrentVersion or latestversion < CurrentVersion:
+                     with open("Settings\\Settings.py", "r") as f:
+                        settings = f.read()
+                        if 'AutoUpdate = "on"' in settings:
+                            OutPutWrite("An update is available. Updating..", "yellow")
+                            Update()
+
+
+
+                        elif 'AutoUpdate = "off"' in settings:
+                            OutPutWrite('An update is available.\nPress the "Update" button to update', "yellow")
+                            self.ClearOutPutButton = customtkinter.CTkButton(master=self, text="Update", border_width=2, command=lambda: RunFunc(Update))
+                            self.ClearOutPutButton.grid(row=0, column=1, padx=(10, 10), pady=(10, 10), sticky="nsew")
+
+        CheckVersion()
+
+
+
+
+
+        self.grid_columnconfigure(1, weight=1)
+        self.grid_columnconfigure((2, 3), weight=0)
+        self.grid_rowconfigure((0, 1, 2), weight=1)
+
+        self.sidebar_frame = customtkinter.CTkFrame(self, width=140, corner_radius=0)
+        self.sidebar_frame.grid(row=0, column=0, rowspan=4, sticky="nsew")
+        self.sidebar_frame.grid_rowconfigure(4, weight=1)
+
+        self.sidebar_button_0 = customtkinter.CTkButton(self.sidebar_frame, text="Scan for Wi-Fi Networks", command=lambda: RunFunc(ScanWiFi))
+        self.sidebar_button_0.grid(row=0, column=0, padx=10, pady=5)
+
+        self.sidebar_button_1 = customtkinter.CTkButton(self.sidebar_frame, text="Generate Passwords", command=lambda: RunFunc())
+        self.sidebar_button_1.grid(row=1, column=0, padx=10, pady=5)
+
+        self.sidebar_button_3 = customtkinter.CTkButton(self.sidebar_frame, text="File Infomation", command=lambda: RunFunc())
+        self.sidebar_button_3.grid(row=2, column=0, padx=10, pady=5)
+
+        self.sidebar_button_4 = customtkinter.CTkButton(self.sidebar_frame, text="Video Downloader", command=lambda: RunFunc(VideoRun))
+        self.sidebar_button_4.grid(row=3, column=0, padx=10, pady=5)
+
+
+ #       self.appearance_mode_label = customtkinter.CTkLabel(self.sidebar_frame, text=f"Status: {self.check_status()}", anchor="w")
+ #       self.appearance_mode_label.grid(row=3, column=0, padx=10, pady=(10, 0))
+
+
+        self.sidebar_button_5 = customtkinter.CTkButton(self.sidebar_frame, text="Settings", command=self.OpenSettings)
+        self.sidebar_button_5.grid(row=5, column=0, padx=10, pady=5)
+
+        self.OutPutLabel = customtkinter.CTkLabel(self, text="OutPut", font=customtkinter.CTkFont(size=15, weight="bold"))
+        self.OutPutLabel.grid(row=0, column=1, padx=(10, 0), pady=(30, 0), sticky="w")
+
+
+
+
+
+
+
+        def PassWordText():
+            ClearOutPut()
+            Msg = rf"""    
+-------------------------------------------------------------------                                             
+1. Generate Passwords                                       
+2. Test Your Passwords durability                             
+3. Crack a Password Outside of the Program
+4. Exit
+-------------------------------------------------------------------
+""".format()    
+            OutPutWrite(Msg, "white")
+
+
+
+
+
+
+
+
+
+
+
+
+
+        def RunFunc(func="ERROR"):
+                if not func == "ERROR":
+                    
+                    thread = threading.Thread(target=func)
+                    thread.daemon = True
+                    thread.start()
+                else:
+                    ClearOutPut()
+                    OutPutWrite(func, "red")
+                    EMsg = f"Unkown Error: Unkown function. Function name: {func}"
+                    success, error = WriteError("Unkown Error", EMsg)
+                    if not success:
+                        OutPutWrite(f'Error: Failed to make a txt file in "Errors": {error}.', "red")
+
+
+        def ScanWiFi():
+            try:
+                result = subprocess.run(["netsh", "wlan", "show", "network"], capture_output=True, text=True, timeout=5)
+                output_lines = result.stdout.splitlines()
+                networks = []
+
+                for line in output_lines:
+                    if "SSID" in line:
+                        networks.append({'SSID': line.split(":")[1].strip()})
+                    elif "Signal" in line:
+                        networks[-1]['Signal Strength'] = line.split(":")[1].strip()
+                    elif "Authentication" in line:
+                        auth_type = line.split(":")[1].strip()
+                        networks[-1]['Password Required'] = auth_type not in {"Open", "None"}
+                        networks[-1]['Authentication'] = auth_type
+                    elif "Encryption" in line:
+                        networks[-1]['Encryption Type'] = line.split(":")[1].strip()
+                    elif "Radio type" in line:
+                        networks[-1]['Network Mode'] = line.split(":")[1].strip()
+                    elif "Frequency" in line:
+                        networks[-1]['Frequency'] = line.split(":")[1].strip()
+                    elif "Channel" in line:
+                        networks[-1]['Channel'] = line.split(":")[1].strip()
+
+                if networks:
+                    networks.sort(key=lambda x: int(x.get('Signal Strength', '0')), reverse=True)
+                    OutPutWrite("Available Wi-Fi Networks:", "white")
+                    for network in networks:
+                        signal_strength = network.get('Signal Strength', 'Unknown')
+                        authentication = network.get('Authentication', 'Unknown')
+                        encryption_type = network.get('Encryption Type', 'Unknown')
+                        mode = network.get('Network Mode', 'Unknown')
+                        frequency = network.get('Frequency', 'Unknown')
+                        channel = network.get('Channel', 'Unknown')
+
+                        OutPutWrite(f"\nSSID: {network['SSID']}", "white")
+                        OutPutWrite(f"  Signal Strength: {signal_strength}", "white")
+                        OutPutWrite(f"  Authentication: {authentication}", "white")
+                        OutPutWrite(f"  Encryption Type: {encryption_type}", "white")
+                        OutPutWrite(f"  Network Mode: {mode}", "white")
+                        OutPutWrite(f"  Frequency: {frequency}", "white")
+                        OutPutWrite(f"  Channel: {channel}", "white")
+                        OutPutWrite(f"  Password Required: {'Needed' if network.get('Password Required') else 'Not Needed'}", "white")
+
+                        try:
+                            ipv4 = socket.getaddrinfo(network['SSID'], None, socket.AF_INET)[0][4][0]
+                            OutPutWrite(f"  IPv4 Address: {ipv4}", "#32CD32")
+                        except socket.gaierror:
+                            OutPutWrite("  IPv4 Address: Not available", "red")
+
+                        try:
+                            ipv6 = socket.getaddrinfo(network['SSID'], None, socket.AF_INET6)[0][4][0]
+                            OutPutWrite(f"  IPv6 Address: {ipv6}", "#32CD32")
+                        except socket.gaierror:
+                            OutPutWrite("  IPv6 Address: Not available", "red")
+
+                        connected = subprocess.run(["netsh", "wlan", "show", "interfaces"], capture_output=True, text=True)
+                        if network['SSID'] in connected.stdout:
+                            OutPutWrite("  Connected to it: True", "#32CD32")
+                        else:
+                            OutPutWrite("  Connected to it: False", "red")
+
+                        if network.get('Password Required'):
+                            OutPutWrite("  Security: Secure", "#32CD32")
+                        else:
+                            OutPutWrite("  Security: Open", "#32CD32")
+
+                        available = subprocess.run(["netsh", "wlan", "show", "network", "mode=BSSID"], capture_output=True, text=True)
+                        if network['SSID'] in available.stdout:
+                            OutPutWrite("  Available: True", "#32CD32")
+                        else:
+                            OutPutWrite("  Available: False", "red")
+
+                    if os.path.exists("Settings\\Settings.py"):
+                        with open("Settings\\Settings.py", "r") as f:
+                             settings = f.read()
+                        if 'Notification = "on"' in settings:
+                            WinMsg("NetForge", "Done Scanning", "Done Scanning For Wi-Fi Networks")
+
+                        elif 'Notification = "off"' in settings:
+                            OutPutWrite("\nDone Scanning For Networks.", "#32CD32")
+                    else:
+                        OutPutWrite("Did not find Settings.py in the 'Settings' folder. Creating a new one..", "yellow")
+                        with open("Settings\\Settings.py", "w") as f:
+                            f.write('Notification = "off"\nSound = "off"\nAutoUpdate = "off"')
+
+                else:
+                    OutPutWrite("No Wi-Fi networks found.", "yellow")
+
+            except subprocess.TimeoutExpired as e:
+                EMsg = f"Error: {e}"
+                success, error = WriteError("TimeoutExpired", EMsg)
+                if not success:
+                    OutPutWrite(f'Error: Failed to make a txt file in "Errors": {error}.', "red")
+
+                OutPutWrite("Wi-Fi network scan timed out.", "red")
+
+            except subprocess.CalledProcessError as e:
+                EMsg = f"Error: {e}"
+                success, error = WriteError("CalledProcessError", EMsg)
+                if not success:
+                    OutPutWrite(f'Error: Failed to make a txt file in "Errors": {error}.', "red")
+
+                OutPutWrite(f"Error: {e}", "red")
+
+            except Exception as e:
+                EMsg = f"Error: {e}"
+                success, error = WriteError("Exception", EMsg)
+                if not success:
+                    OutPutWrite(f'Error: Failed to make a txt file in "Errors": {error}.', "red")
+
+                OutPutWrite(f"An unexpected error occurred: {e}", "red")
+
+
+
+
+    
+
+
+    def open_discord():
+        webbrowser.open('https://discord.gg/')
+
+
+    def OpenSettings(self):
+        settings_window = SettingsWindow()
+        settings_window.geometry(f"{525}x{314}")
+    
+
+
+
+
+
+
+        
+############################################################################################ Settings
+class SettingsWindow(tk.Toplevel):
+    def __init__(self):
+        super().__init__()
+        self.title("Settings")
+        self.configure(background="black")
+        self.resizable(False, False)
+        self.geometry(f"{525}x{414}")
+
+
+        self.Frame = customtkinter.CTkFrame(self, width=140, corner_radius=0)
+        self.Frame.grid(row=0, column=0, sticky="nsew")
+
+        # Configure row and column weights
+        self.grid_rowconfigure(0, weight=1)
+        self.grid_columnconfigure(0, weight=1)
+
+        self.button = customtkinter.CTkButton(self.Frame, text="Theme Selector", command=self.Open_Custom_Ui)
+        self.button.grid(row=0, column=0, padx=10, pady=(10, 0), sticky="nw")
+
+        self.button = customtkinter.CTkButton(self.Frame, text="Report Error", command=self.ShowReport)
+        self.button.grid(row=1, column=0, padx=10, pady=(10, 0), sticky="n")
+
+        self.button = customtkinter.CTkButton(self.Frame, text="Save Changes", command=self.Save_Changes)
+        self.button.place(relx=0.5, rely=0.9, anchor="s")
+
+        self.sound_var = customtkinter.StringVar()
+        self.SoundCheckBox = customtkinter.CTkCheckBox(self.Frame, text="Sound effects", variable=self.sound_var, onvalue="on", offvalue="off")
+
+        self.notification_var = customtkinter.StringVar()
+        self.notification_checkbox = customtkinter.CTkCheckBox(self.Frame, text="Notifications", variable=self.notification_var, onvalue="on", offvalue="off")
+        self.notification_checkbox.grid(row=2, column=0, padx=10, pady=(10, 0), sticky="w")
+        self.notification_checkbox.bind("<Button-1>", self.toggle_sound_checkbox)
+
+        self.AutoUpdateVar = customtkinter.StringVar()
+        self.AutoUpdateCheckBox = customtkinter.CTkCheckBox(self.Frame, text="Auto Update", variable=self.AutoUpdateVar, onvalue="on", offvalue="off")
+        self.AutoUpdateCheckBox.grid(row=4, column=0, padx=10, pady=(10, 0), sticky="w")
+
+        self.protocol("WM_DELETE_WINDOW", self.SaveChangesBeforeClosing)
+
+        if os.path.exists("Settings\\Settings.py"):
+            with open("Settings\\Settings.py", "r") as f:
+                settings = f.read()
+                if 'Notification = "on"' in settings:
+                    self.notification_var.set("on")
+                    self.notification_checkbox.select()
+    
+                    if 'Sound = "on"' in settings:
+                        self.sound_var.set("on")
+                        self.SoundCheckBox.select()
+                    else:
+                        self.sound_var.set("off")
+                        self.SoundCheckBox.deselect()
+                    self.SoundCheckBox.grid(row=3, column=0, padx=10, pady=(10, 0), sticky="w")
+                else:
+                    self.Remove_CheckBox_Sound()
+                    
+                if 'AutoUpdate = "on"' in settings:
+                    self.AutoUpdateVar.set("on")
+                    self.AutoUpdateCheckBox.select()
+                else:
+                    self.AutoUpdateVar.set("off")
+                    self.AutoUpdateCheckBox.deselect()
+
+        self.grab_set()
+        self.wait_window()
+
+    def SaveChangesBeforeClosing(self):
+        if os.path.exists("Settings\\Settings.py"):
+            with open("Settings\\Settings.py", "r") as f:
+                settings = f.read()
+                if ('Notification = "on"' in settings and self.notification_var.get() == "off") or \
+                   ('Sound = "on"' in settings and self.sound_var.get() == "off") or \
+                   ('Notification = "off"' in settings and self.notification_var.get() == "on") or \
+                   ('Sound = "off"' in settings and self.sound_var.get() == "on") or \
+                   ('AutoUpdate = "off"' in settings and self.AutoUpdateVar.get() == "on") or \
+                   ('AutoUpdate = "on"' in settings and self.AutoUpdateVar.get() == "off"):
+                    
+                    if messagebox.askyesno("Save Changes", "Do you want to save the changes?"):
+                        if self.SaveSettings():
+                            self.destroy()
+                        else:
+                            if messagebox.askretrycancel("Failed", "Failed to save changes. Retry?"):
+                                if self.SaveSettings():
+                                    self.destroy()
+                                else:
+                                    messagebox.showerror('Failed again', 'Failed to save changes again. Check out the "Errors" folder in "Other" for more infomation')
+        else:
+            with open("Settings\\Settings.py", "w") as f:
+                f.write('Notification = "off"\nSound = "off"\nAutoUpdate = "off"')
+
+
+        self.destroy()
+
+
+
+    def Remove_CheckBox_Sound(self):
+        if hasattr(self, "SoundCheckBox"):
+            self.SoundCheckBox.destroy()
+
+    def toggle_sound_checkbox(self, event):
+        if self.notification_var.get() == "on":
+            self.sound_var = customtkinter.StringVar()
+            self.SoundCheckBox = customtkinter.CTkCheckBox(self.Frame, text="Sound effects", variable=self.sound_var, onvalue="on", offvalue="off")
+            self.SoundCheckBox.grid(row=3, column=0, padx=10, pady=(10, 0), sticky="w")
+
+        else:
+            self.Remove_CheckBox_Sound()
+
+    def Save_Changes(self):
+        if self.SaveSettings():
+            self.button.configure(text="Successfully Saved!")
+            self.after(1500, lambda: self.button.configure(text="Save Changes"))
+        else:
+            self.button.configure(text="Failed to Save Changes! Check 'Errors' folder in 'Other'.")
+            self.after(10000, lambda: self.button.configure(text="Save Changes"))
+
+
+    def Open_Custom_Ui(self):
+        custom_ui_window = ThemeSelectorWindow(self)
+        custom_ui_window.geometry(f"{525}x{314}")
+        self.resizable(False, False)
+
+    def SaveSettings(self):
+        try:
+            Value = self.notification_var.get()
+            SoundValue = self.sound_var.get()
+            AutoUpdateValue = self.AutoUpdateVar.get()
+            with open("Settings\\Settings.py", "w") as f:
+                f.write(f'Notification = "{Value}"\nSound = "{SoundValue}"\nAutoUpdate = "{AutoUpdateValue}"')
+            return True
+        
+        except Exception as e:
+            EMsg = f"Error: {e}"
+            success, error = WriteError("Exception", EMsg)
+            if not success:
+                return False
+            else:
+                return False
+        
+    def ShowReport(self, event=None):
+        ReportErrorWindow(self)
+
+
+
+############################################################################################ Theme Selector </>
+class ThemeSelectorWindow(tk.Toplevel):# 
+    def __init__(self, parent):
+        super().__init__(parent)
+        self.title("Theme Selector")
+        self.geometry(f"{525}x{314}")
+        self.resizable(False, False)
+        self.configure(background="black")
+        self.app_instance = parent
+
+
+        self.Frame = customtkinter.CTkFrame(self, width=140, corner_radius=0)
+        self.Frame.grid(row=0, column=0, sticky="nsew")
+
+        # Configure row and column weights
+        self.grid_rowconfigure(0, weight=1)
+        self.grid_columnconfigure(0, weight=1)
+
+
+        self.OutPutAndPath = customtkinter.CTkTextbox(self, width=300, height=50)
+        self.OutPutAndPath.place(relx=0.5, rely=0.2, anchor="center")
+
+        browse_button = customtkinter.CTkButton(self, text="Browse", command=self.Browse)
+        browse_button.place(relx=0.5, rely=0.8, anchor="center")
+
+        update_button = customtkinter.CTkButton(self, text="Update Theme", command=self.Click)
+        update_button.place(relx=0.5, rely=0.9, anchor="center")
+
+        self.grab_set()
+        self.wait_window()
+        
+    def OutPutWrite(self, msg, color="red"):
+            self.OutPutAndPath.configure(state="normal")
+            self.OutPutAndPath.tag_config(color, foreground=color)
+            self.OutPutAndPath.insert(tk.END, msg, color)
+            self.OutPutAndPath.insert(tk.END, "\n")
+            self.OutPutAndPath.configure(state="disabled")
+            
+            """
+            LimeGreen = "#32CD32"  
+            
+            
+            
+            """
+
+
+    def ClearOutPut(self):
+            self.OutPutAndPath.configure(state="normal")
+            self.OutPutAndPath.delete("1.0", tk.END)
+            self.OutPutAndPath.configure(state="disabled")
+
+    def Browse(self):
+        file_path = filedialog.askopenfilename(filetypes=[("JSON files", "*.json")])
+        if file_path:
+            self.ClearOutPut()
+            self.OutPutWrite(file_path, "white")
+
+    def UpdateTheme(self, path):
+        try:
+            with open("Settings\\Selected Theme.py", "w") as f:
+                f.write(f'"{path}"')
+                return True
+            
+        except Exception as e:
+            EMsg = f"Error: {e}"
+            success, error = WriteError("Exception", EMsg)
+            if not success:
+                self.ClearOutPut()
+                self.OutPutWrite(f'Error: Failed to make a txt file in "Errors": {error}.\nError while updating theme File: {e}', "red")
+                return False
+            
+            self.ClearOutPut()
+            self.OutPutWrite(f"Error while updating theme File: {e}", "red")
+            return False
+
+    def ValidateJson(self, path):
+        if not os.path.exists(path):
+            self.ClearOutPut()
+            self.OutPutWrite("Error: The specified file path does not exist.", "red")            
+            return False
+        elif not path.endswith(".json"):
+            self.ClearOutPut()
+            self.OutPutWrite("Error: The file is not a JSON file.", "red")
+            return False
+        else:
+            try:
+                with open(path, "r") as f:
+                    json.load(f)
+                return True
+            
+            except json.JSONDecodeError as e:
+                EMsg = f"Error: {e}"
+                success, error = WriteError("JSONDecodeError", EMsg)
+                if not success:
+                    self.ClearOutPut()
+                    self.OutPutWrite(f'Error: Failed to make a txt file in "Errors": {error}.\nError: Invalid JSON format.', "red")
+
+                self.ClearOutPut()
+                self.OutPutWrite("Error: Invalid JSON format.")
+                return False
+            
+    def Click(self):
+        path = self.OutPutAndPath.get("1.0", "end").strip()
+        self.ClearOutPut()
+        if self.ValidateJson(path):
+            if self.UpdateTheme(path):
+                self.ClearOutPut()
+                self.OutPutWrite("Theme Successfully Updated!\nRerun the program to apply the new theme.", "#32CD32")
+                self.OutPutAndPath.configure(state="normal")
+                
+            else:
+                self.OutPutAndPath.configure(state="normal")
+        else:
+            self.OutPutAndPath.configure(state="normal")
+
+
+############################################################################## Report Error
+class ReportErrorWindow(tk.Toplevel):
+    def __init__(self, parent):
+        super().__init__(parent)
+        self.title("Report")
+        self.geometry(f"{525}x{314}")
+        self.resizable(False, False)
+        self.configure(background="black")
+        self.app_instance = parent
+        
+
+        self.Frame = customtkinter.CTkFrame(self, width=140, corner_radius=0)
+        self.Frame.grid(row=0, column=0, sticky="nsew")
+
+        # Configure row and column weights
+        self.grid_rowconfigure(0, weight=1)
+        self.grid_columnconfigure(0, weight=1)
+
+        self.Subject = customtkinter.CTkTextbox(self, width=200, height=30)
+        self.Subject.place(relx=0.5, rely=0.2, anchor="center")
+
+        self.Message = customtkinter.CTkTextbox(self, width=400, height=40)
+        self.Message.place(relx=0.5, rely=0.5, anchor="center")
+
+        self.UserName = customtkinter.CTkTextbox(self, width=230, height=30)
+        self.UserName.place(relx=0.5, rely=0.8, anchor="center")
+
+        self.SubmitButton = customtkinter.CTkButton(self, text="Submit Report", command=self.Submit)
+        self.SubmitButton.place(relx=0.5, rely=0.9, anchor="center")
+
+        self.Subject.insert(tk.END, "Subject")
+
+        self.Message.insert(tk.END, "Message Here")
+
+        self.UserName.insert(tk.END, "Your Discord Username (optional)")
+        
+        
+
+        self.grab_set()
+        self.wait_window()
+
+
+
+    def OutPutWrite(self, msg, color="red"):
+            self.SubmitButton.configure(text_color=color)
+            self.SubmitButton.configure(text=msg)
+            """
+            LimeGreen = "#32CD32"  
+            """
+
+
+    def ClearOutPut(self):
+        self.SubmitButton.configure(text_color="white")
+        self.SubmitButton.configure(text="Submit Report")
+
+
+    def RunFunc(self, func="ERROR"):
+                if not func == "ERROR":
+                    
+                    thread = threading.Thread(target=func)
+                    thread.daemon = True
+                    thread.start()
+                else:
+                    self.ClearOutPut()
+                    self.OutPutWrite(func, "red")
+                    EMsg = f"Unkown Error: Unkown function. Function name: {func}"
+                    success, error = WriteError("Unkown Error", EMsg)
+                    if not success:
+                        self.OutPutWrite(f'Error: Failed to make a txt file in "Errors": {error}.', "red")
+
+
+    def SubmitReport(self, message="No Message was given", Subject="No Subject Was given", Username="No Username was given"):
+        Url = "https://discord.com/api/webhooks/1219002117801639996/BNP4oEsW2XtJXrgX9NAZNZ1-Z9ZWbYMWyVpbNElzuswaNT-0xC55uv4h_l-cUyfyCzrL"
+        payload = {
+        "content": f"**Subject:** {Subject}\n**Report:** {message}\n**Discord User:** {Username}"
+    }
+        try:
+            response = requests.post(Url, json=payload)
+            if response.status_code == 204:
+                self.ClearOutPut()
+                self.OutPutWrite("Report Successfully submitted!", "#32CD32")
+                self.after(5000, lambda: self.ClearOutPut())
+                return True
+            else:
+                self.ClearOutPut()
+                EMsg = f"Failed to submit Report. Status code: {response.status_code}"
+                success, error = WriteError("Status code", EMsg)
+                if not success:
+                    self.OutPutWrite(f'Error: Failed to make a txt file in "Errors": {error}.\nFailed to submit Report. Status code: {response.status_code}', "red")
+                else:
+                    self.OutPutWrite(f"Failed to submit Report. Status code: {response.status_code}", "red")
+                return False
+            
+        except Exception as e:
+            self.ClearOutPut()
+            EMsg = f"An error occurred: {e}"
+            success, error = WriteError("Exception", EMsg)
+            if not success:
+                self.OutPutWrite(f'Error: Failed to make a txt file in "Errors": {error}.\nAn error occurred: {e}', "red")
+            else:
+                self.OutPutWrite(f"An error occurred: {e}", "red")
+            return False
+
+
+            
+    def Submit(self):
+        global Submitted
+        try:
+            if Submitted == False:
+                Subject = self.Subject.get("1.0", "end").strip()
+                Message = self.Message.get("1.0", "end").strip()
+                Username = self.UserName.get("1.0", "end").strip()
+                if self.SubmitReport(Message, Subject, Username):
+                        Submitted = True
+                        self.Message.configure(state="normal")
+                
+                else:
+                    self.Message.configure(state="normal")
+                    self.after(5000, lambda: self.ClearOutPut())
+                    
+            else:
+                self.SubmitButton.configure(text="You already submitted a Report!")
+                self.after(5000, lambda: self.ClearOutPut())
+
+        except Exception as e:
+            self.ClearOutPut()
+            EMsg = f"Error: {e}"
+            success, error = WriteError("Exception", EMsg)
+            if not success:
+                self.ClearOutPut()
+                self.OutPutWrite(f'Error: Failed to make a txt file in "Errors": {error}.\nError: {e}', "red")
+                return False
+
+            self.OutPutWrite(f"Error: {e}", "red")
+
+
+                
+
+
+        
+
+
+if __name__ == "__main__":
+    app = App()
+    app.mainloop()
+
+
+
+
