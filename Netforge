@@ -8,6 +8,8 @@ import threading
 import socket
 import getpass
 import logging
+import shutil
+
 
 import pathlib
 import requests
@@ -45,7 +47,7 @@ from tkinter import *
 
 
 
-
+#
 Submitted = False
 CurrentVersion = 'V2.0'
 
@@ -450,18 +452,54 @@ class App(customtkinter.CTk):
 
 
         def Update():
-                try:
-                    ui = requests.get("https://raw.githubusercontent.com/ARIUSBOY12/Redeemer-Latest-Source-Code-Version/main/Netforge")
-                    if ui.status_code == 200:
-                        latest_source = ui.text
-                        with open("Server.py", "w", encoding="utf-8") as file:
-                            file.write(latest_source)
-                        OutPutWrite(Colors.green,"Installion was successfully!\nPlease Rerun the program", "#32CD32")
-                        time.sleep(10)
-                    else:
-                        OutPutWrite(f"Installion Failed. Status code: {ui.status_code}", "red")
-                except Exception as e:
-                        OutPutWrite(f"An error occurred: {e}", "red")
+            try:
+                response = requests.get("https://raw.githubusercontent.com/ARIUSBOY12/Redeemer-Latest-Source-Code-Version/main/Netforge")
+                if response.status_code == 200:
+                    latest_source = response.text
+                    CreateBackup()
+                    with open("Temporary.py", "w", encoding="utf-8") as file:
+                        file.write(latest_source)
+                    ReplaceSourceFile()
+                    OutPutWrite("Installation was successful!\nDeleting Backup file...", "#32CD32")
+                    if os.path.exists("Server Backup.py"):
+                        os.remove("Server Backup.py")
+                    if not os.path.exists("Server Backup.py"):
+                        OutPutWrite("Successfully deleted backup file.\nPlease rerun the program.", "#32CD32")
+            
+                else:
+                    OutPutWrite(f"Installation failed. Status code: {response.status_code}", "red")
+    
+            except requests.RequestException as e:
+                OutPutWrite(f"Network error occurred: {e}", "red")
+    
+            except IOError as e:
+                OutPutWrite(f"IO error occurred: {e}", "red")
+    
+            except Exception as e:
+                OutPutWrite(f"An unexpected error occurred: {e}", "red")
+
+        def CreateBackup():
+            try:
+                if os.path.exists("Server.py"):
+                    shutil.copy2("Server.py", "Server Backup.py")
+                    OutPutWrite("Backup created successfully.", "#32CD32")
+
+            except Exception as e:
+                OutPutWrite(f"Error occurred during backup creation: {e}", "red")
+
+
+        def ReplaceSourceFile():
+            try:
+                if os.path.exists("Temporary.py"):
+                    os.replace("Temporary.py", "Server.py")
+                    OutPutWrite("Source file replaced successfully.", "#32CD32")
+                else:
+                    OutPutWrite("Temporary source file not found. Aborting replacement...", "red")
+            except Exception as e:
+                OutPutWrite(f"Error occurred during source file replacement: {e}", "red")        
+
+
+
 
         def CheckVersion():
          time.sleep(0.2)
@@ -1118,7 +1156,6 @@ class ReportErrorWindow(tk.Toplevel):
 if __name__ == "__main__":
     app = App()
     app.mainloop()
-
 
 
 
