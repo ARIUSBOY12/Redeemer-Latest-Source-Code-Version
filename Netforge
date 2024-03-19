@@ -49,7 +49,7 @@ from tkinter import *
 
 
 Submitted = False
-CurrentVersion = 'V1.0'
+CurrentVersion = 'V2.0'
 
 User = getpass.getuser()
 
@@ -496,7 +496,7 @@ class App(customtkinter.CTk):
             try:
                 if os.path.exists("Server.py"):
                     shutil.copy2("Server.py", "Server Backup.py")
-                    OutPutWrite("Backup created successfully.", "#32CD32")
+                    OutPutWrite("Created Backup...", "white")
 
             except Exception as e:
                 OutPutWrite(f"Error occurred during backup creation: {e}", "red")
@@ -506,7 +506,7 @@ class App(customtkinter.CTk):
             try:
                 if os.path.exists("Temporary.py"):
                     os.replace("Temporary.py", "Server.py")
-                    OutPutWrite("Source file replaced successfully.", "#32CD32")
+                    OutPutWrite("Source file replaced...", "white")
                 else:
                     OutPutWrite("Temporary source file not found. Aborting replacement...", "red")
             except Exception as e:
@@ -529,8 +529,10 @@ class App(customtkinter.CTk):
                 success, error = WriteError("RequestException", EMsg)
                 if not success:
                     WriteError(f'Error: Failed to make a txt file in "Errors": {error}. Error: RequestException: {e}')
+                    return False
                 else:
                     OutPutWrite(f'Error: {e}', "red")
+                    return False
 
 
 
