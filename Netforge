@@ -47,9 +47,9 @@ from tkinter import *
 
 
 
-#
+
 Submitted = False
-CurrentVersion = 'V2.0'
+CurrentVersion = 'V1.0'
 
 User = getpass.getuser()
 
@@ -127,6 +127,14 @@ class VidInstall(tk.Toplevel):# Video installer
         self.geometry(f"{525}x{314}")
         self.resizable(False, False)
 
+        if os.path.exists("Visual Media\\Images\\Netforge.ico"):
+            self.iconbitmap("Visual Media\\Images\\Netforge.ico")
+        else:
+            EMsg = f"Error: No suitable video stream found."
+            success, error = WriteError("File not Found", EMsg)
+            if not success:
+                self.OutPutWrite(f'Error: Failed to make a txt file in "Errors": {error}. Error: Netforge.ico not found.', "red")
+
         self.appearance_mode_label = customtkinter.CTkLabel(self, text=f"Paste in the Video's URL")
         self.appearance_mode_label.place(relx=0.5, rely=0.1, anchor="n")
 
@@ -143,7 +151,8 @@ class VidInstall(tk.Toplevel):# Video installer
         self.URL = customtkinter.CTkTextbox(self, width=260)
         self.URL.place(relx=0.5, rely=0.5, anchor="center")
         self.URL.configure(state="normal")
-        
+
+
 
         self.Button = customtkinter.CTkButton(self, text="Download", command=lambda: self.ChoosenOne(self.URL.get("1.0", "end-1c")))
         self.Button.place(relx=0.5, rely=1, anchor="s")
@@ -164,6 +173,7 @@ class VidInstall(tk.Toplevel):# Video installer
             """
             LimeGreen = "#32CD32"  
             """
+
 
 
     def ClearOutPut(self):
@@ -420,6 +430,8 @@ class App(customtkinter.CTk):
         self.resizable(False, False)  
         self.configure(background="black")
 
+        DelOutPutLabel = False
+
         self.OutPut = customtkinter.CTkTextbox(self, width=250)
         self.OutPut.grid(row=1, column=1, padx=(10, 10), pady=(10, 10), sticky="nsew")
         self.OutPut.configure(state="disabled")
@@ -444,6 +456,8 @@ class App(customtkinter.CTk):
             self.OutPut.configure(state="normal")
             self.OutPut.delete("1.0", tk.END)
             self.OutPut.configure(state="disabled")
+
+
 
         if os.path.exists("Visual Media\\Images\\Netforge.ico"):
             self.iconbitmap("Visual Media\\Images\\Netforge.ico")
@@ -526,6 +540,7 @@ class App(customtkinter.CTk):
                         if 'AutoUpdate = "on"' in settings:
                             OutPutWrite("An update is available. Updating..", "yellow")
                             Update()
+                            return False
 
 
 
@@ -533,8 +548,10 @@ class App(customtkinter.CTk):
                             OutPutWrite('An update is available.\nPress the "Update" button to update', "yellow")
                             self.ClearOutPutButton = customtkinter.CTkButton(master=self, text="Update", border_width=2, command=lambda: RunFunc(Update))
                             self.ClearOutPutButton.grid(row=0, column=1, padx=(10, 10), pady=(10, 10), sticky="nsew")
+                            return True
 
-        CheckVersion()
+        if CheckVersion():
+            DelOutPutLabel = True
 
 
 
@@ -569,7 +586,9 @@ class App(customtkinter.CTk):
         self.sidebar_button_5.grid(row=5, column=0, padx=10, pady=5)
 
         self.OutPutLabel = customtkinter.CTkLabel(self, text="OutPut", font=customtkinter.CTkFont(size=15, weight="bold"))
-        self.OutPutLabel.grid(row=0, column=1, padx=(10, 0), pady=(30, 0), sticky="w")
+        self.OutPutLabel.grid(row=0, column=1, padx=(15, 0), pady=(30, 0), sticky="w")
+        if DelOutPutLabel == True:
+            self.OutPutLabel.destroy()
 
 
 
@@ -759,6 +778,8 @@ class SettingsWindow(tk.Toplevel):
         self.resizable(False, False)
         self.geometry(f"{525}x{414}")
 
+        if os.path.exists("Visual Media\\Images\\Netforge.ico"):
+            self.iconbitmap("Visual Media\\Images\\Netforge.ico")
 
         self.Frame = customtkinter.CTkFrame(self, width=140, corner_radius=0)
         self.Frame.grid(row=0, column=0, sticky="nsew")
@@ -770,11 +791,14 @@ class SettingsWindow(tk.Toplevel):
         self.button = customtkinter.CTkButton(self.Frame, text="Theme Selector", command=self.Open_Custom_Ui)
         self.button.grid(row=0, column=0, padx=10, pady=(10, 0), sticky="nw")
 
-        self.button = customtkinter.CTkButton(self.Frame, text="Report Error", command=self.ShowReport)
+        self.button = customtkinter.CTkButton(self.Frame, text="Report Issue", command=self.ShowReport)
         self.button.grid(row=1, column=0, padx=10, pady=(10, 0), sticky="n")
 
         self.button = customtkinter.CTkButton(self.Frame, text="Save Changes", command=self.Save_Changes)
-        self.button.place(relx=0.5, rely=0.9, anchor="s")
+        self.button.place(relx=0.4, rely=0.9, anchor="s")
+        
+        self.DefaultSettingsButton = customtkinter.CTkButton(self.Frame, text="Default Settings", command=self.DefaultSettings)
+        self.DefaultSettingsButton.place(relx=0.7, rely=0.9, anchor="s")
 
         self.sound_var = customtkinter.StringVar()
         self.SoundCheckBox = customtkinter.CTkCheckBox(self.Frame, text="Sound effects", variable=self.sound_var, onvalue="on", offvalue="off")
@@ -816,6 +840,27 @@ class SettingsWindow(tk.Toplevel):
 
         self.grab_set()
         self.wait_window()
+
+    def DefaultSettings(self, event=None):
+        if messagebox.askyesno("Confirm", "Are you sure you want to set all settings to default?"):
+            try:
+                if os.path.exists("Settings\\Settings.py"):
+                    with open("Settings\\Settings.py", "w") as f:
+                        f.write('Notification = "off"\nSound = "off"\nAutoUpdate = "off"')
+                    self.notification_var.get() == "off"
+                    self.sound_var.get() == "off"
+                    self.AutoUpdateVar.get() == "off"
+
+                    self.notification_checkbox.deselect()
+                    self.SoundCheckBox.deselect()
+                    self.AutoUpdateCheckBox.deselect()
+
+
+            except Exception as e:
+                messagebox.showerror('Error', f'Failed to set all settings to default: {e}')
+
+            
+
 
     def SaveChangesBeforeClosing(self):
         if os.path.exists("Settings\\Settings.py"):
@@ -905,6 +950,8 @@ class ThemeSelectorWindow(tk.Toplevel):#
         self.configure(background="black")
         self.app_instance = parent
 
+        if os.path.exists("Visual Media\\Images\\Netforge.ico"):
+            self.iconbitmap("Visual Media\\Images\\Netforge.ico")
 
         self.Frame = customtkinter.CTkFrame(self, width=140, corner_radius=0)
         self.Frame.grid(row=0, column=0, sticky="nsew")
@@ -1015,12 +1062,14 @@ class ThemeSelectorWindow(tk.Toplevel):#
 class ReportErrorWindow(tk.Toplevel):
     def __init__(self, parent):
         super().__init__(parent)
-        self.title("Report")
+        self.title("Report Issue")
         self.geometry(f"{525}x{314}")
         self.resizable(False, False)
         self.configure(background="black")
         self.app_instance = parent
         
+        if os.path.exists("Visual Media\\Images\\Netforge.ico"):
+            self.iconbitmap("Visual Media\\Images\\Netforge.ico")
 
         self.Frame = customtkinter.CTkFrame(self, width=140, corner_radius=0)
         self.Frame.grid(row=0, column=0, sticky="nsew")
@@ -1029,14 +1078,17 @@ class ReportErrorWindow(tk.Toplevel):
         self.grid_rowconfigure(0, weight=1)
         self.grid_columnconfigure(0, weight=1)
 
+        self.Title = customtkinter.CTkLabel(self.Frame, text=f"Report Issue")
+        self.Title.place(relx=0.5, rely=0.1, anchor="center")
+
         self.Subject = customtkinter.CTkTextbox(self, width=200, height=30)
-        self.Subject.place(relx=0.5, rely=0.2, anchor="center")
+        self.Subject.place(relx=0.5, rely=0.3, anchor="center")
 
         self.Message = customtkinter.CTkTextbox(self, width=400, height=40)
         self.Message.place(relx=0.5, rely=0.5, anchor="center")
 
         self.UserName = customtkinter.CTkTextbox(self, width=230, height=30)
-        self.UserName.place(relx=0.5, rely=0.8, anchor="center")
+        self.UserName.place(relx=0.5, rely=0.7, anchor="center")
 
         self.SubmitButton = customtkinter.CTkButton(self, text="Submit Report", command=self.Submit)
         self.SubmitButton.place(relx=0.5, rely=0.9, anchor="center")
